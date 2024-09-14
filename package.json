@@ -1,0 +1,19 @@
+{
+  "name": "redge",
+  "version": "1.0.0",
+  "description": "rt0s edge service",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arisi/redge.git"
+  },
+  "author": "Ari Siitonen / Loractive Oy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/arisi/redge/issues"
+  },
+  "homepage": "https://github.com/arisi/redge#readme"
+}

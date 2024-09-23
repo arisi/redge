@@ -1,0 +1,467 @@
+{
+  config: {
+    idlen: 6,
+    seqlen: 6,
+  },
+  messages: {
+    identity: {
+      id: 0x1,
+      direction: "both",
+      config: true,
+      descr: "Device Identity",
+      payload: [
+        {
+          name: "ack",
+          size: 1,
+        },
+        {
+          name: "rseq",
+          size: 6,
+        },
+        {
+          name: "flash_start",
+          size: 32,
+        },
+        {
+          name: "flash_block_size",
+          size: 16,
+        },
+        {
+          name: "flash_blocks",
+          size: 16,
+        },
+        {
+          name: "hw_len",
+          size: 6,
+        },
+        {
+          name: "hw",
+          size: 8,
+          n: "hw_len",
+          type: "string",
+        },
+        {
+          name: "cpu_len",
+          size: 6,
+        },
+        {
+          name: "cpu",
+          size: 8,
+          n: "cpu_len",
+          type: "string",
+        },
+        {
+          name: "sw_len",
+          size: 6,
+        },
+        {
+          name: "sw",
+          size: 8,
+          n: "sw_len",
+          type: "string",
+        },
+        {
+          name: "hw_rev_len",
+          size: 6,
+        },
+        {
+          name: "hw_rev",
+          size: 8,
+          n: "hw_rev_len",
+          type: "string",
+        },
+        {
+          name: "sw_rev_len",
+          size: 6,
+        },
+        {
+          name: "sw_rev",
+          size: 8,
+          n: "sw_rev_len",
+          type: "string",
+        },
+        {
+          name: "serno_len",
+          size: 6,
+        },
+        {
+          name: "serno",
+          size: 8,
+          n: "serno_len",
+          type: "string",
+        },
+        {
+          name: "af_len",
+          size: 6,
+        },
+        {
+          name: "af",
+          size: 8,
+          n: "af_len",
+          type: "string",
+        },
+      ],
+    },
+
+    generic_req: {
+      id: 0x2,
+      direction: "down",
+      descr: "Generic Request",
+      payload: [
+        {
+          name: "id",
+          size: 6,
+        },
+      ],
+    },
+    flash_write: {
+      id: 0x3,
+      direction: "down",
+      reply: "generic_ack",
+      descr: "Write to Flash",
+      payload: [
+        {
+          name: "address",
+          size: 32,
+        },
+        {
+          name: "data_len",
+          size: 6,
+        },
+        {
+          name: "data",
+          size: 8,
+          n: "data_len",
+        },
+      ],
+    },
+    flash_erase: {
+      id: 0x4,
+      direction: "down",
+      reply: "generic_ack",
+      descr: "Erase Flash Area",
+      payload: [
+        {
+          name: "address",
+          size: 32,
+        },
+      ],
+    },
+    reset: {
+      id: 0x5,
+      direction: "down",
+      reply: "generic_ack",
+      descr: "Reset the Device",
+      payload: [
+        {
+          name: "delay",
+          size: 32,
+        },
+        {
+          name: "data_len",
+          size: 6,
+        },
+        {
+          name: "data",
+          size: 8,
+          n: "data_len",
+        },
+      ],
+    },
+    log_write: {
+      id: 0x6,
+      direction: "up",
+      descr: "Send a Log to Cloud",
+      payload: [
+        {
+          name: "tick",
+          size: 32,
+        },
+        {
+          name: "lseq",
+          size: 16,
+        },
+        {
+          name: "stream",
+          size: 8,
+        },
+        {
+          name: "data_len",
+          size: 8,
+        },
+        {
+          name: "data",
+          type: "string",
+          size: 8,
+          n: "data_len",
+        },
+      ],
+    },
+    generic_ack: {
+      id: 0x7,
+      direction: "up",
+      descr: "Ack a Request",
+      payload: [
+        {
+          name: "rseq",
+          size: 6,
+        },
+        {
+          name: "ack",
+          size: 32,
+        },
+      ],
+    },
+    write8: {
+      reply: "write_ack",
+      id: 0x8,
+      direction: "down",
+      descr: "Write bytes",
+      payload: [
+        {
+          name: "address",
+          size: 32,
+        },
+        {
+          name: "data_len",
+          size: 6,
+        },
+        {
+          name: "data",
+          size: 8,
+          n: "data_len",
+        },
+      ],
+    },
+    write16: {
+      reply: "write_ack",
+      id: 0x9,
+      direction: "down",
+      descr: "Write short words (16-bit)",
+      payload: [
+        {
+          name: "address",
+          size: 32,
+        },
+        {
+          name: "data_len",
+          size: 6,
+        },
+        {
+          name: "data",
+          size: 16,
+          n: "data_len",
+        },
+      ],
+    },
+    write32: {
+      reply: "write_ack",
+      id: 0xa,
+      direction: "down",
+      descr: "Write long words (32-bit)",
+      payload: [
+        {
+          name: "address",
+          size: 32,
+        },
+        {
+          name: "data_len",
+          size: 6,
+        },
+        {
+          name: "data",
+          size: 32,
+          n: "data_len",
+        },
+      ],
+    },
+    write_ack: {
+      id: 0xb,
+      direction: "up",
+      payload: [
+        {
+          name: "rseq",
+          size: 6,
+        },
+        {
+          name: "success",
+          size: 2,
+          enum: {
+            "0": "OK",
+            "1": "BAD_ADDR",
+            "2": "VERIFY_FAIL",
+          },
+        },
+      ],
+    },
+    read8: {
+      id: 0xc,
+      direction: "down",
+      descr: "Reed bytes",
+      reply: "read8ack",
+      payload: [
+        {
+          name: "address",
+          size: 32,
+        },
+        {
+          name: "data_len",
+          size: 6,
+        },
+      ],
+    },
+    read8ack: {
+      id: 0xd,
+      direction: "up",
+      payload: [
+        {
+          name: "rseq",
+          size: 6,
+        },
+        {
+          name: "data_len",
+          size: 6,
+        },
+        {
+          name: "data",
+          size: 8,
+          n: "data_len",
+        },
+      ],
+    },
+    read16: {
+      id: 0xe,
+      direction: "down",
+      descr: "Reed words (16bit)",
+      reply: "read16ack",
+      payload: [
+        {
+          name: "address",
+          size: 32,
+        },
+        {
+          name: "data_len",
+          size: 6,
+        },
+      ],
+    },
+    read16ack: {
+      id: 0xf,
+      direction: "up",
+      payload: [
+        {
+          name: "rseq",
+          size: 6,
+        },
+        {
+          name: "data_len",
+          size: 6,
+        },
+        {
+          name: "data",
+          size: 16,
+          n: "data_len",
+        },
+      ],
+    },
+    read32: {
+      id: 0x10,
+      direction: "down",
+      descr: "Reed long words (32bit)",
+      reply: "read32ack",
+      payload: [
+        {
+          name: "address",
+          size: 32,
+        },
+        {
+          name: "data_len",
+          size: 6,
+        },
+      ],
+    },
+    read32ack: {
+      id: 0x11,
+      direction: "up",
+      payload: [
+        {
+          name: "rseq",
+          size: 6,
+        },
+        {
+          name: "data_len",
+          size: 6,
+        },
+        {
+          name: "data",
+          size: 32,
+          n: "data_len",
+        },
+      ],
+    },
+    ping: {
+      direction: "both",
+      id: 0x12,
+      descr: "Send a Ping",
+      reply: "pong",
+      payload: [
+        {
+          name: "tick",
+          size: 32,
+        },
+        {
+          name: "target",
+          size: 2,
+        },
+      ],
+    },
+    pong: {
+      direction: "both",
+      descr: "Send a reply to a Ping",
+      id: 0x13,
+      payload: [
+        {
+          name: "rseq",
+          size: 6,
+        },
+        {
+          name: "tick",
+          size: 32,
+        },
+        {
+          name: "source",
+          size: 2,
+        },
+      ],
+    },
+    call: {
+      id: 0x14,
+      reply: "generic_ack",
+      direction: "down",
+      descr: "Call a Function",
+      payload: [
+        {
+          name: "address",
+          size: 32,
+        },
+        {
+          name: "arg0",
+          size: 32,
+        },
+        {
+          name: "arg1",
+          size: 32,
+        },
+        {
+          name: "data_len",
+          size: 4,
+        },
+        {
+          name: "data",
+          size: 8,
+          n: "data_len",
+        },
+      ],
+    },
+  },
+}

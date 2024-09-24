@@ -1,0 +1,63 @@
+{
+  jwt_secret: 'demo123',
+  acme_home: '~/.acme.sh/',
+  urls: ['localhost','loractive.io'],
+  users: [
+    {
+      username: 'anon',
+      password: 'anon',
+      acl: 'anon',
+      rate: 10,
+      max_sessions: 6
+    },
+    {
+      username: 'demo',
+      password: 'demo',
+      acl: 'default',
+      rate: 100,
+      max_sessions: 6
+    }
+  ],
+  sockets: [
+    {
+      name: 'http',
+      port: 8090,
+      protocol: 'http',
+      sites: [
+        {
+          name: 'localhost',
+          redir: 'https://loractive.io:9091/',
+          urls: ['localhost']
+        }
+      ]
+    },
+    {
+      name: 'https',
+      port: 9091,
+      protocol: 'https',
+      sites: [
+        {
+          name: 'loractive.io',
+          static: 'web/localhost',
+          urls: ['loractive.io']
+        }
+      ]
+    },
+    {
+      name: 'mqtt',
+      port: 8091,
+      protocol: 'mqtt',
+      max_connected: 200,
+      url: 'localhost',
+      users: ['*']
+    },
+    {
+      name: 'ws',
+      port: 8092,
+      protocol: 'ws',
+      max_connected: 200,
+      url: 'localhost',
+      users: ['demo', 'anon']
+    }
+  ],
+}

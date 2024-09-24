@@ -13,7 +13,7 @@
     }
   ],
 
-  "title": "Rt0s Debugger",
+  "title": "Rt0s DEMO",
   "scripts": [
     "https://cdnjs.cloudflare.com/ajax/libs/sprintf/1.1.2/sprintf.min.js",
     "https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js",
@@ -21,17 +21,13 @@
     "https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.3.7/mqtt.min.js",
     "https://cdnjs.cloudflare.com/ajax/libs/json5/2.2.3/index.min.js",
     "https://cdn.jsdelivr.net/npm/ascii-table@0.0.9/ascii-table.min.js",
-    "rt0s_browser.js",
     "https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js",
     "https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.8.6/jsrsasign-all-min.js",
     "https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.2/dist/semantic.min.js",
+    "lib-rt0s.js",
     "redge.js"
   ],
-  "links":[
-    {"rel":"apple-touch-icon", "sizes": "180x180", "href": "/apple-touch-icon.png"},
-    {"rel":"icon", "type": "image/png", "sizes":"32x32", "href": "/favicon-32x32.png"},
-    {"rel":"icon", "type": "image/png", "sizes":"16x16", "href": "/favicon-16x16.png"}
-  ],
+  "links":[ ],
   "css": [
     "https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.2/dist/semantic.min.css",
     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css",

@@ -12,7 +12,6 @@
       "content": "width=device-width, initial-scale=1.0, maximum-scale=1.0"
     }
   ],
-
   "title": "Rt0s DEMO",
   "scripts": [
     "https://cdnjs.cloudflare.com/ajax/libs/sprintf/1.1.2/sprintf.min.js",
@@ -25,9 +24,9 @@
     "https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.8.6/jsrsasign-all-min.js",
     "https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.2/dist/semantic.min.js",
     "lib-rt0s.js",
-    "redge.js"
+    "lib-redge.js"
   ],
-  "links":[ ],
+  "links": [],
   "css": [
     "https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.2/dist/semantic.min.css",
     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css",

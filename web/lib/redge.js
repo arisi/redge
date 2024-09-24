@@ -227,10 +227,6 @@ $(document).ready(async () => {
       log_magenta("LIVE %s: '%s' (%s,%s,%s) ...", event, preload, base, ext, key);
       switch (event) {
         case 'modified':
-          if (base == 'redge') {
-            location.reload();
-            return;
-          }
           switch (ext) {
             case 'css':
               $(`style[data-src='${key}']`).remove();
@@ -268,8 +264,7 @@ $(document).ready(async () => {
               log_green("JSON %s '%s'", event, key);
               break;
             case 'js':
-              if (base == 'redge') return;
-              if (base == 'rt0s_browser') return;
+
               if ((base.substring(0, 6) == 'redge-')) {
                 if (!initial) {
                   reload_req = stamp() + 100;

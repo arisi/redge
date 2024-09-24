@@ -35,10 +35,12 @@
     "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap",
     "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css"
   ],
-  "libs":[
+  "static-libs":[
     "hb",
     "redge",
-    "rt0s",
+    "rt0s"
+  ],
+  "dynamic-libs":[
     "util"
   ]
 }

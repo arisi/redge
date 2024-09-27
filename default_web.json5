@@ -1,7 +1,7 @@
 {
   jwt_secret: 'demo123',
   acme_home: '~/.acme.sh/',
-  urls: ['localhost','loractive.io'],
+  urls: ['localhost','loractive.io','dev.rt0s.com','ari.rt0s.com'],
   users: [
     {
       username: 'anon',
@@ -27,7 +27,12 @@
         {
           name: 'localhost',
           redir: 'https://loractive.io:9091/',
-          urls: ['localhost']
+          urls: ['localhost','dev.rt0s.com']
+        },
+        {
+          name: 'ari',
+          static: 'web/localhost',
+          urls: ['ari.rt0s.com']
         }
       ]
     },
@@ -39,7 +44,7 @@
         {
           name: 'loractive.io',
           static: 'web/localhost',
-          urls: ['loractive.io']
+          urls: ['loractive.io','dev.rt0s.com']
         }
       ]
     },

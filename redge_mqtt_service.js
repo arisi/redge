@@ -1,3 +1,9 @@
+var conf = {}
+var cons = {}
+var users = {}
+var user_stats = {}
+var do_send_ind_state = true;
+var _id = "broker"
 
 var aconf = {
   realPublished: (client, packet) => {
@@ -6,13 +12,6 @@ var aconf = {
     }
   }
 }
-
-var conf = {}
-var cons = {}
-var users = {}
-var user_stats = {}
-var do_send_ind_state = true;
-var _id = "broker"
 
 var aedes = require('aedes')(aconf)
 const match = require('mqtt-match')

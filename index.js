@@ -3,11 +3,6 @@
 const fs = require('fs')
 const yargs = require('yargs')
 const os = require('os')
-const sprintf = require('sprintf')
-const path = require('path')
-const dns = require('dns')
-const Handlebars = require("handlebars");
-const chokidar = require('chokidar');
 const JSON5 = require('json5');
 const log = console.log.bind(console);
 
@@ -23,9 +18,6 @@ sleep = (time) => {
 }
 
 var hostname = os.hostname().replace('\.', '_').replace('-', '_');
-const home_dir = os.homedir();
-const pwd = process.cwd()
-
 
 const argv = yargs
   .command('mq11_broker.js', 'MQ11 MQTT Broker', {})
@@ -110,7 +102,6 @@ if (MQ) {
     process.exit(-1)
   }
 }
-
 
 if (!conf.web_home) {
   console.log("no web_home in config, using pwd");

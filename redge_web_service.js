@@ -1,6 +1,6 @@
-
 const fs = require('fs')
 const os = require('os')
+const sprintf = require('sprintf')
 const https = require('https')
 const jwt = require('jsonwebtoken')
 const ws = require('websocket-stream')
@@ -174,10 +174,10 @@ var web_respond = (s, req, res, next) => {
     res.end()
     return
   }
-  if (req.hostname.match(/\d+\.\d+\.\d+\.\d+/) || req.hostname.match(/::ffff:\d+\.\d+\.\d+\.\d+/)) {
-    res.end()
-    return
-  }
+  // if (req.hostname.match(/\d+\.\d+\.\d+\.\d+/) || req.hostname.match(/::ffff:\d+\.\d+\.\d+\.\d+/)) {
+  //   res.end()
+  //   return
+  // }
   if (req.path.match(/\.php$/) || req.path.match(/\.aspx$/)) {
     res.end()
     return
@@ -190,7 +190,6 @@ var web_respond = (s, req, res, next) => {
   } catch (error) {
     //
   }
-  //REFACTOR : this is a copy from https
   if (ip.slice(0, 7) == '::ffff:') ip = ip.slice(7)
   hit = false
   for (i = 0; i < s.sites.length && !hit; i++) {
@@ -303,25 +302,39 @@ var my_session = session({
   cookie: { secure: true, maxAge: 600000 }
 });
 
-var update = (p, event, u, path) => {
-  var fn = path.substr(p.length + 1)
-  var payload = ""
-  if (event != 'deleted')
-    payload = fs.readFileSync(path).toString()
-  var obj = {
-    event,
-    fn,
-    payload
-  }
-  var topic = `/ind/site_${u.name}/updates`
-  aedes.publish({
-    topic,
-    payload: JSON.stringify(obj),
-    retain: false,
-  })
-}
-
 var start_services = () => {
+  var p = path.join(conf.web_home, "web")
+  var watchers = []
+  var register_watch = (path, cb) => {
+    log("reg watch", path)
+    watchers.push({path, cb});
+  }
+  var changed = (event, path) => {
+    for (var o of watchers) {
+      log("changed ", event, path, o.path, path.substr(0, o.path.length))
+      if (o.path == path.substr(0, o.path.length)) {
+        log("changed HIT", event, path,o.path)
+        o.cb(event,path)
+      }
+    }
+  }
+  chokidar.watch(p, {
+    ignored: /(^|[\/\\])\../, // ignore dotfiles
+    persistent: true,
+    ignoreInitial: true
+  })
+    .on('error', (error) => log(`Watcher error: ${error}`))
+    .on('ready', () => log(`.. watching ${p}`))
+    .on('change', (path) => {
+      changed('modified', path);
+    })
+    .on('add', (path) => {
+      changed('created', path);
+    })
+    .on('unlink', (path) => {
+      changed('deleted', path);
+    });
+
   conf.sockets.forEach(s => {
     s.connected = 0
     switch (s.protocol) {
@@ -357,26 +370,18 @@ var start_services = () => {
                 console.log(`.. listening ${s.protocol}://${uu}:${s.port}`)
               })
               var p = path.join(conf.web_home, u.static, "dynamic")
-              log("about to watch", p, "for", `${s.protocol}://${u.urls}:${s.port}`)
-              chokidar.watch(p, {
-                ignored: /(^|[\/\\])\../, // ignore dotfiles
-                persistent: true,
-                ignoreInitial: true
+              register_watch(p, (event, path) => {
+                log("WATCHER:", event, path);
+                var fn = path.substr(p.length + 1)
+                var payload = ""
+                if (event != 'deleted')
+                  payload = fs.readFileSync(path).toString()
+                aedes.publish({
+                  topic: `/ind/site_${u.name}/updates`,
+                  payload: JSON.stringify({event, fn, payload}),
+                  retain: false,
+                })
               })
-                .on('error', (error) => log(`Watcher error: ${error}`))
-                .on('ready', () => log(`.. watching ${p}`))
-                .on('change', (path) => {
-                  log("change:::", p, path, u.name)
-                  update(p, 'modified', u, path);
-                })
-                .on('add', (path) => {
-                  log("add:::", p, path)
-                  update(p, 'created', u, path);
-                })
-                .on('unlink', (path) => {
-                  log("unlink:::", p, path)
-                  update(p, 'deleted', u, path);
-                });
             });
           })
         }

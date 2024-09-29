@@ -18,10 +18,10 @@ var requireSync = async (fn) => {
 }
 
 $(document).ready(async () => {
-  await requireSync("lib-util.js");
-  await requireSync("lib-hb.js");
+  await requireSync("l_util.js");
+  await requireSync("l_hb.js");
   log_green("Rt0s Edge Web Front:\n");
-  await requireSync("lib-test.js");
+  await requireSync("l_test.js");
   lib_testeri();
 
   const urlSearchParams = new URLSearchParams(window.location.search);
@@ -39,6 +39,7 @@ $(document).ready(async () => {
     }
   }
   window.conf = JSON.parse(await Rt0s.get_file("conf.json"))
+  console.log("preloads", preloads);
 
   for (preload of preloads) {
     var hit = preload.match(/(.+)\.(.+)$/);
@@ -82,6 +83,7 @@ $(document).ready(async () => {
     if (hit) {
       var base = hit[1]
       var ext = hit[2]
+      log_blue("hb preload check %s,%s", ext,base)
       if ((ext == 'js') && (base.substring(0, 2) == 'p_')) {
         var s = await Rt0s.get_file(preload);
         var ss = `window.js_${base} = ${s}\n`
@@ -271,7 +273,7 @@ $(document).ready(async () => {
                 }
                 return;
               }
-              if (base.substring(0, 4) == 'lib-') {
+              if (base.substring(0, 2) == 'l_') {
                 await requireSync(preload);
                 log_green("preload: JS update '%s'", preload);
                 return;

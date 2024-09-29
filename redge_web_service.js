@@ -87,13 +87,17 @@ var build_index = (site) => {
   for (var css of csss)
     tag("link", { rel: 'stylesheet', href: css, crossorigin: "anonymous" })
   tag("link", { rel: 'preload', href: 'conf.json', as: 'fetch', type: "application/json", crossorigin: "anonymous" })
-
+  var p = path.join(conf.web_home, "web/lib")
+  var lpreloads = fs.readdirSync(p)
+  for (var preload of lpreloads) {
+    tag("link", { rel: 'preload', href: preload, as: 'fetch', type: "text/html", crossorigin: "anonymous" })
+  }
   var p = path.join(conf.web_home, site.static, "dynamic")
   var preloads = fs.readdirSync(p)
   for (var preload of preloads) {
     tag("link", { rel: 'preload', href: preload, as: 'fetch', type: "text/html", crossorigin: "anonymous" })
   }
-  tag("script", {}, `\nwindow.preloads=${JSON.stringify(preloads, null, 2)};\n`)
+  tag("script", {}, `\nwindow.preloads=${JSON.stringify(preloads.concat(lpreloads), null, 2)};\n`)
   ctag()
   tag("body")
   var ss = ""
@@ -107,7 +111,6 @@ var build_index = (site) => {
   ctag()
   return s;
 }
-
 
 var hostcheck = (h) => {
   var hits = conf.urls.filter(a => h.match(`${a}$`))
@@ -251,8 +254,18 @@ var web_respond = (s, req, res, next) => {
     } else {
       var pext = p.split(".").pop();
       var pbase = p.substr(0, p.length - pext.length - 1);
+
+      // check libs
+      //if ((pext == 'js') && (path.basename(p).substring(0,2) == 'l_')) {
+        var lib_fn = path.join(conf.web_home, "web/lib", p)
+        if (fs.existsSync(lib_fn)) {
+          console.log("lib hit", lib_fn);
+          res.sendFile(lib_fn)
+          return
+        }
+      //}
+
       var html_fn = path.join(conf.web_home, hit.static, "dynamic", p)
-      console.log("dyn html?", html_fn);
       if (fs.existsSync(html_fn)) {
         res.sendFile(html_fn)
         return
@@ -313,6 +326,10 @@ var start_services = () => {
     for (var o of watchers) {
       log("changed ", event, path, o.path, path.substr(0, o.path.length))
       if (o.path == path.substr(0, o.path.length)) {
+        log("changed HIT", event, path,o.path)
+        o.cb(event,path)
+      }
+      else if (o.path == path.substr(0, o.path.length)) {
         log("changed HIT", event, path,o.path)
         o.cb(event,path)
       }

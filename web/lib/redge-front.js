@@ -18,7 +18,7 @@ class RedgeFront {
     this.conf = conf;
     this.name = name;
 
-    log_blue("EL: '%s' constructed id=%d", this.name, this.id);
+    log_blue("EL: '%s' constructed id=%d.", this.name, this.id);
   }
 
   deconstructor() {

@@ -23,8 +23,8 @@
     "https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js",
     "https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.8.6/jsrsasign-all-min.js",
     "https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.2/dist/semantic.min.js",
-    "lib-rt0s.js",
-    "lib-redge.js"
+    "l_rt0s.js",
+    "l_redge.js"
   ],
   "links": [],
   "css": [

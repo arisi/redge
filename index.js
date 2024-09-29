@@ -9,6 +9,7 @@ const log = console.log.bind(console);
 const redge_serial = require("./redge_serial")
 const redge_mqtt_service = require("./redge_mqtt_service")
 const redge_web_service = require("./redge_web_service")
+const redge_runner_service = require("./redge_runner_service")
 
 stamp = () => {
   return (new Date).getTime();
@@ -130,4 +131,5 @@ if (!argv.rt0s) {
   redge_serial.poll();
   aedes = redge_mqtt_service.config(argv, conf)
   redge_web_service.config(argv, conf, web_conf, aedes)
+  redge_runner_service.config(argv, conf, web_conf, aedes)
 })();

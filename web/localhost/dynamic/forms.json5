@@ -1,7 +1,7 @@
 {
   login: {
     key: "LOGIN",
-    name: "Login to Rt0s Debugger",
+    name: "Login to Rt0s Debugger!",
     fields: [
       {
         name: "Login Name!!",

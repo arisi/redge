@@ -216,12 +216,9 @@ window.Rt0s = class Rt0s {
   change_state(newstate) {
     if (this.connected == newstate && newstate == false) {
       this.client.end(true, () => {
-        //this.do_connect('demo', 'demo');
-        console.log("DUH END");
         delete this.client;
         this.client = {};
-        console.log("DUH END2");
-        this.onChangeState('END');
+        log_red("** MQTT Client Deleted");
       });
       return;
     }
@@ -421,10 +418,12 @@ window.Rt0s = class Rt0s {
     }.bind(this));
 
     this.client.on('disconnect', function(err) {
+      log_red("** MQTT Disconnected");
       this.change_state(false);
     }.bind(this));
 
     this.client.on('offline', function(err) {
+      log_red("** MQTT Offline");
       this.change_state(false);
     }.bind(this));
 

@@ -7,3 +7,4 @@ web/localhost/dynamic/lib-libb.js
 web/localhost/dynamic/lib-test.js
 web/localhost/dynamic/p_test.hbs
 web/localhost/dynamic/p_test.js
+artefact/**

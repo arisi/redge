@@ -2,8 +2,10 @@ var conf = {}
 var cons = {}
 var users = {}
 var user_stats = {}
+var apis = []
 var do_send_ind_state = true;
 var _id = "broker"
+var { AsciiTable3, AlignmentEnum } = require('ascii-table3');
 
 var aconf = {
   realPublished: (client, packet) => {
@@ -56,6 +58,19 @@ var send_ind_state = () => {
     payload: JSON.stringify(obj),
     retain: true,
   })
+  //console.log("ind sent", obj);
+  var rows = [];
+  for (var [name, o] of Object.entries(cons)) {
+    if (o.indications && ("identity" in o.indications)) {
+      //console.log("inds", o.indications.identity.serno);
+      rows.push([name, timed((stamp() - o.connected) / 1000), o.indications.identity.serno, o.indications.identity.af])
+    } else
+      rows.push([name, timed((stamp() - o.connected) / 1000),"",""])
+  }
+  var table = new AsciiTable3()
+    .setHeading('Name', 'Uptime', 'Serno', 'Af')
+    .addRowMatrix(rows);
+  console.log(table.toString());
 }
 
 aedes.on('client', function(client) {
@@ -78,7 +93,6 @@ aedes.on('publish', (packet, client) => {
         var obj = JSON.parse(s);
         if (id in cons) {
           cons[id].indications[obj.topic] = obj;
-          //send_ind_state();
           do_send_ind_state = true;
         } else
           console.log("DUH", id);
@@ -304,6 +318,13 @@ const options = {
     }
   }
 }
+setInterval(() => {
+  if (do_send_ind_state) {
+    //save_state()
+    send_ind_state()
+    do_send_ind_state = false;
+  }
+}, 1000)
 
 config = (_argv, _conf) => {
   argv = _argv;

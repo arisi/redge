@@ -83,7 +83,6 @@ $(document).ready(async () => {
     if (hit) {
       var base = hit[1]
       var ext = hit[2]
-      log_blue("hb preload check %s,%s", ext,base)
       if ((ext == 'js') && (base.substring(0, 2) == 'p_')) {
         var s = await Rt0s.get_file(preload);
         var ss = `window.js_${base} = ${s}\n`
@@ -402,7 +401,7 @@ $(document).ready(async () => {
 
   }
 
-  var mq = window.mq = new window.Rt0s(conf.mqtt, "weppi", u, pw, onChange)
+  var mq = window.mq = new window.Rt0s(conf.mqtt, "web", u, pw, onChange)
 
   for (var event of ['click', 'focusout', 'keyup', 'change'])
     document.addEventListener(event, (e) => {

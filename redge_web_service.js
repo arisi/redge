@@ -222,6 +222,10 @@ var web_respond = (s, req, res, next) => {
     var p = req.path == '/' ? '/index.html' : req.path
     var fn = `${hit.static}/${p}`
     var full_fn = path.join(conf.web_home, fn)
+    if (p.substr(0, 10) == "/artefact/") {
+      full_fn = path.join(conf.web_home, p)
+      fn = p;
+    }
     var ext = fn.split(".").pop();
     var base = fn.substr(0, fn.length - ext.length - 1);
     res.header('sid', req.sessionID)

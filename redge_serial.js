@@ -115,11 +115,11 @@ runner = (tty, driver) => {
 
     //mq.publish(`/ind/${argv.id}/lost`, { path: id })
 
-    // aedes.publish({
-    //   topic: `/ind/${argv.id}/lost`,
-    //   payload: JSON.stringify({ path: id }),
-    //   retain: false,
-    // })
+    aedes.publish({
+      topic: `/ind/${argv.id}/lost`,
+      payload: JSON.stringify({ path: id }),
+      retain: false,
+    })
 
     console.log("lost", tty);
   });

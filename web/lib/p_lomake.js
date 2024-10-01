@@ -263,6 +263,7 @@ class RedgeLomake extends RedgeFront {
   }
 
   onEvent(obj) {
+    super.onEvent(ob)
     var fld = this.state.form.fields.find(o => obj.key == o.key)
     //console.log("lomakkeen onEvent", fld, obj);
     switch (obj.event) {

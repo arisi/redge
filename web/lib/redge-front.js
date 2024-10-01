@@ -53,4 +53,8 @@ class RedgeFront {
     log_blue("EL: '%s' populate id=%d '%s'", this.name, this.id, req);
   }
 
+  onEvent(obj) {
+    log_blue("EL: '%s' onEvent id=%d '%s'", this.name, this.id, JSON.stringify(obj));
+  }
+
 }

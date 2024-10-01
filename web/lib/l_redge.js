@@ -4,6 +4,7 @@ var objs = []
 var buttons = {}
 var preserved_state = {}
 var reload_req = 0;
+$$ = {ok:1}
 
 var requireSync = async (fn) => {
   var i = preloads.findIndex((a) => a == fn);
@@ -270,6 +271,14 @@ $(document).ready(async () => {
                 if (!initial) {
                   reload_req = stamp() + 100;
                 }
+                return;
+              }
+              console.log("********* RELOAD?", base);
+              if ((base == 'p_index')) {
+                if (!initial) {
+                  reload_req = stamp() + 100;
+                }
+                console.log("********* RELOAD");
                 return;
               }
               if (base.substring(0, 2) == 'l_') {

@@ -1,8 +1,8 @@
 class RedgeIndex extends RedgeFront {
   constructor(mq, conf, id, name) {
     super(mq, conf, id, name);
-    console.log("indeksi!");
-    window.devices = {}
+    console.log("loading p_index.js");
+    $$.devices = {}
     var getSync = async (fn) => {
       return new Promise((res, err) => {
         $.get(fn, function(data) {

@@ -263,7 +263,7 @@ class RedgeLomake extends RedgeFront {
   }
 
   onEvent(obj) {
-    super.onEvent(ob)
+    super.onEvent(obj)
     var fld = this.state.form.fields.find(o => obj.key == o.key)
     //console.log("lomakkeen onEvent", fld, obj);
     switch (obj.event) {
@@ -337,6 +337,6 @@ class RedgeLomake extends RedgeFront {
         break;
     }
     obj.e.preventDefault();
-    preserved_state[this.name] = JSON.parse(JSON.stringify(this.state.fdata));
+    $_.preserved_state[this.name] = JSON.parse(JSON.stringify(this.state.fdata));
   }
 }

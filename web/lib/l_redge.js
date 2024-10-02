@@ -1,6 +1,6 @@
 const log = console.log.bind(console);
 var reload_req = 0;
-$$ = {
+$_ = {
   objects: [],
   buttons: {},
   preserved_state: {},
@@ -103,20 +103,20 @@ $(document).ready(async () => {
   });
 
   window.register_button_handler = (name, id, cb) => {
-    if (!(name in $$.buttons))
-      $$.buttons[name] = {}
-    $$.buttons[name][id] = cb;
+    if (!(name in $_.buttons))
+      $_.buttons[name] = {}
+    $_.buttons[name][id] = cb;
   }
 
   window.deregister_button_handler = (name, id) => {
-    if ((name in $$.buttons))
-      $$.buttons[name][id] = undefined;
+    if ((name in $_.buttons))
+      $_.buttons[name][id] = undefined;
   }
 
   window.emit_button_event = (name, obj, id) => {
     log_magenta("emit_button_event name='%s' id=%s %s", name, id, JSON.stringify(obj));
-    if ((name in $$.buttons)) {
-      for (var [_id, b] of Object.entries($$.buttons[name])) {
+    if ((name in $_.buttons)) {
+      for (var [_id, b] of Object.entries($_.buttons[name])) {
         if (b)
           b(obj, id)
       }
@@ -140,12 +140,12 @@ $(document).ready(async () => {
       if (old_id) {
         id = old_id
       } else {
-        id = $$.idc++
-        var old = $$.objects.findIndex(o => o && (o.name == name))
+        id = $_.idc++
+        var old = $_.objects.findIndex(o => o && (o.name == name))
         if (old != -1) {
-          log_darkcyan("DELETE EL name='%s' id=%s fdata=%s", name, old, JSON.stringify($$.objects[old].state.fdata));
-          $$.objects[old].deconstructor();
-          delete $$.objects[old]
+          log_darkcyan("DELETE EL name='%s' id=%s fdata=%s", name, old, JSON.stringify($_.objects[old].state.fdata));
+          $_.objects[old].deconstructor();
+          delete $_.objects[old]
           $(`#${old}`).remove();
         }
       }
@@ -156,14 +156,14 @@ $(document).ready(async () => {
           if (js_reload && old_id) {
             // try to retain form data
             var oldf = {}
-            if (id in $$.objects) {
-              oldf = $$.objects[id].state.fdata;
-              if ("destructor" in $$.objects[id])
-                $$.objects[id].destructor()
+            if (id in $_.objects) {
+              oldf = $_.objects[id].state.fdata;
+              if ("destructor" in $_.objects[id])
+                $_.objects[id].destructor()
             }
-            delete $$.objects[id]
-            $$.objects[id] = new window[`js_${req.js}`](mq, conf, id, $(el).attr('name'), oldf, ddd)
-            await $$.objects[id].sync(req)
+            delete $_.objects[id]
+            $_.objects[id] = new window[`js_${req.js}`](mq, conf, id, $(el).attr('name'), oldf, ddd)
+            await $_.objects[id].sync(req)
             emit_button_event('RENDER', { id, name: $(el).attr('name') }, '');
           } else {
             if (!window[`js_${req.js}`]) {
@@ -172,11 +172,11 @@ $(document).ready(async () => {
             }
             try {
               var fdata = req.data
-              if (name in $$.preserved_state) {
-                fdata = $$.preserved_state[name];
+              if (name in $_.preserved_state) {
+                fdata = $_.preserved_state[name];
               }
               log_darkcyan("CREATE EL name='%s' '%s' id=%d data='%s'", $(el).attr('name'), req.js, id, JSON.stringify(fdata));
-              $$.objects[id] = new window[`js_${req.js}`](mq, conf, id, $(el).attr('name'), fdata, ddd)
+              $_.objects[id] = new window[`js_${req.js}`](mq, conf, id, $(el).attr('name'), fdata, ddd)
 
             } catch (error) {
               console.log("new errs", `js_${req.js}`, error);
@@ -187,7 +187,7 @@ $(document).ready(async () => {
               return;
             }
             try {
-              await $$.objects[id].sync(req)
+              await $_.objects[id].sync(req)
               emit_button_event('RENDER', { id, name: $(el).attr('name') }, '');
             } catch (error) {
               console.error("ERROR1", req, src, error);
@@ -198,10 +198,10 @@ $(document).ready(async () => {
         }
       }
       var state;
-      if (!(id in $$.objects)) {
+      if (!(id in $_.objects)) {
         return
       }
-      state = $$.objects[id].state
+      state = $_.objects[id].state
       if (!window[src]) {
         log_darkcyan("UNDEFINED %s", src)
         return;
@@ -214,7 +214,7 @@ $(document).ready(async () => {
       }))
       $(el).attr('id', id)
       $(el).attr('data-id', id)
-      $$.objects[id].populate("") // populate the contents
+      $_.objects[id].populate("") // populate the contents
     }
   }
 
@@ -250,8 +250,8 @@ $(document).ready(async () => {
               }
               log_green("HB updated '%s'", key);
               window[`${key}`] = Handlebars.compile(s)
-              if ($$.objects[0])
-                $$.objects[0].render(true)
+              if ($_.objects[0])
+                $_.objects[0].render(true)
               else
                 for (var el of $(`div[data-src='${key}']`))
                   update_element(el)
@@ -262,7 +262,7 @@ $(document).ready(async () => {
               window[`${key}`] = JSON5.parse(s)
               if (!initial) {
                 //redraw everything to be sure
-                $$.objects[0].render(true)
+                $_.objects[0].render(true)
               }
               log_green("JSON %s '%s'", event, key);
               break;
@@ -291,8 +291,8 @@ $(document).ready(async () => {
                 log_green("JS updated '%s' EL '%s'", key, `[data-js='${base}']`);
                 var ss = `window.${key} = ${s}\n`
                 eval(ss)
-                if ($$.objects[0])
-                  $$.objects[0].render(true)
+                if ($_.objects[0])
+                  $_.objects[0].render(true)
               } catch (error) {
                 log(`js err in ${key}`, error)
               }
@@ -327,7 +327,7 @@ $(document).ready(async () => {
       reload_req = 0;
       location.reload();
     }
-    for (var [k, o] of Object.entries($$.objects)) {
+    for (var [k, o] of Object.entries($_.objects)) {
       if ('tick' in o) {
         o.tick()
       }
@@ -364,14 +364,14 @@ $(document).ready(async () => {
       }
       try {
         log_darkcyan("CREATE EL name='%s' id=%d as root", page, id);
-        $$.objects[id] = new window[`js_p_${page}`](mq, conf, id, 'index')
+        $_.objects[id] = new window[`js_p_${page}`](mq, conf, id, 'index')
       } catch (error) {
         alert(error);
         return;
       }
-      if ('sync' in $$.objects[id])
+      if ('sync' in $_.objects[id])
         try {
-          await $$.objects[id].sync({})
+          await $_.objects[id].sync({})
         } catch (error) {
           $("body").html(`<b>ERROR: '${page}': ${error}</b>`);
           return
@@ -427,8 +427,8 @@ $(document).ready(async () => {
         }
         var id = parseInt($(hit).attr('id'));
         log_green("EVENT '%s' id=%d key='%s'", event, id, key);
-        if ($$.objects[id]) {
-          $$.objects[id].onEvent({
+        if ($_.objects[id]) {
+          $_.objects[id].onEvent({
             e,
             listener: event,
             event: e.type,

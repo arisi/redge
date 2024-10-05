@@ -7,8 +7,6 @@ const JSON5 = require('json5');
 rt0s = require('rt0s_js');
 var { AsciiTable3, AlignmentEnum } = require('ascii-table3');
 
-console.log("\nrt0s Edge Gate v1.0\n");
-
 var term = true
 const argv = yargs
   .option('rt0s', {
@@ -31,12 +29,27 @@ function sleep(time) {
 var stamp = () => {
   return Date.now()
 }
+var dump_devs = () => {
+  var devs = []
+  for (var [d, o] of Object.entries($_.devices)) {
+    console.log(d, o);
+    devs.push([d, o.serno || ''])
+  }
+  var table = new AsciiTable3()
+    .setHeading('Id', 'Serno')
+    .addRowMatrix(devs);
+  console.log(table.toString());
+}
 
 (async () => {
   mq = new rt0s(argv.rt0s, argv.id, "demo", "demo");
   console.log('Connected to Broker at', argv.rt0s);
   $_ = { devices: {} }
   $$ = (cpu_id) => {
+    if (!cpu_id) {
+      dump_devs()
+      return
+    }
     var dev;
     if ($_.devices[cpu_id])
       dev = cpu_id;
@@ -46,22 +59,26 @@ var stamp = () => {
         dev = Object.keys($_.devices).find(key => $_.devices[key].cpu_id == cpu_id)
       }
     }
+    if (!dev) {
+      dump_devs()
+      return
+    }
     return $_.devices[dev].handler
   }
   var helper = (key) => {
     //console.log($_.devices[key].api);
-    var cmds=[]
+    var cmds = []
     for (var a of $_.devices[key].api) {
       if (a.cmd == 'identity') continue;
-      var params =[]
+      var params = []
       for (var aa of a.args) {
         params.push(`${aa.name}:${aa.size}`)
       }
-      cmds.push([a.cmd,  a.descr, params.join()])
+      cmds.push([a.cmd, a.descr, params.join()])
     }
     var table = new AsciiTable3()
-    .setHeading('Cmd', 'Descr', 'Args')
-    .addRowMatrix(cmds);
+      .setHeading('Cmd', 'Descr', 'Args')
+      .addRowMatrix(cmds);
     console.log(table.toString());
     return
   }
@@ -71,7 +88,6 @@ var stamp = () => {
       if (!$_.devices[con]) {
         try {
           var c = b.cons[con];
-          console.log("cons", JSON.stringify(c.indications,null,2));
           try {
             var api = await mq.req_sync(con, ['api', {}], {})
           } catch (error) {
@@ -88,10 +104,9 @@ var stamp = () => {
             }
             var s = `async (${args.join()}) => { return mq.req_sync("${con}", ['${a.cmd}',{${params}}], {}) }`
             handler[a.cmd] = eval(s)
-            console.log("bld", con,a.cmd,s);
           }
           var s = `() => { return helper("${con}") }`
-            handler.help = eval(s)
+          handler.help = eval(s)
 
           $_.devices[con] = {
             connected: c.connected,
@@ -100,7 +115,7 @@ var stamp = () => {
           }
 
 
-          console.log("NEW DEVICE", con);
+          //console.log("NEW DEVICE", con);
         } catch (error) {
           console.log("tout caught", con, error);
         }
@@ -134,7 +149,13 @@ var stamp = () => {
         }
       }
     }
+    if (process.env.RUN) {
+      console.log(`\nexec: '${process.env.RUN}':`);
+      console.log(await eval(process.env.RUN))
+      process.exit()
+    }
   });
+
 })()
 
 module.exports = {

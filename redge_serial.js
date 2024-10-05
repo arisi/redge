@@ -175,4 +175,5 @@ module.exports = {
   config,
   scan,
   poll,
+  g_ports,
 }

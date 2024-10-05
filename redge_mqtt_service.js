@@ -281,6 +281,23 @@ init_users = () => {
   }
 }
 
+registerAPI('ping', "Ping", [], msg => {
+  console.log('WE WERE PINGED - AND PONGED BACK')
+  return { pong: true }
+})
+
+registerAPI("api", "Get API", [], (msg) => {
+  var ret = []
+  for (var c of Object.keys(apis)) {
+    ret.push({
+      cmd: c,
+      descr: apis[c].descr,
+      args: apis[c].args,
+    })
+  }
+  return ret;
+})
+
 const options = {
   SNICallback: (servername, cb) => {
     var ok = hostcheck(servername)
@@ -337,4 +354,5 @@ console.log(`MQTT Service Starting.. `)
 
 module.exports = {
   config,
+  registerAPI,
 }

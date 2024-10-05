@@ -13,41 +13,7 @@ class RedgeIndex extends RedgeFront {
           dev = Object.keys($_.devices).find(key => $_.devices[key].cpu_id == cpu_id)
         }
       }
-      var ret = {
-        p: dev,
-        path: () => {
-          return dev;
-        },
-
-      };
-      var module = {
-        x: 42,
-        getX: function () {
-          return this.x;
-        },
-      }
-      const unboundGetX = module.getX;
-      const boundGetX = unboundGetX.bind(module);
-      ret['getX'] = boundGetX
-      var module2 = {
-        x: 48,
-        getX: function () {
-          return this.x;
-        },
-      }
-      const unboundGetX2 = module2.getX;
-      const boundGetX2 = unboundGetX2.bind(module2);
-      ret['getX2'] = boundGetX2
-
-      for (var api of $_.devices[dev].api) {
-        var a = api;
-
-        ret[api.cmd] = () => {
-          return "poks " + this.p;
-        }
-          //$_.devices[dev].api[0],
-      }
-      return ret
+      return $_.devices[dev].handler
     }
     var getSync = async (fn) => {
       return new Promise((res, err) => {
@@ -63,10 +29,24 @@ class RedgeIndex extends RedgeFront {
           try {
             var c = b.cons[con];
             var api = await mq.req(con, ['api'], {})
+            var handler = {}
+            for (var a of api) {
+              var args = []
+              var params= []
+              for (var aa of a.args) {
+                args.push(aa.name)
+                params.push(`"${aa.name}":${aa.name}`)
+              }
+              handler[a.cmd] = eval(`async (${args.join()}) => { return await mq.req("${con}", ['${a.cmd}',{${params}}], {}) }`)
+            }
+
             $_.devices[con] = {
               connected: c.connected,
-              api
+              api,
+              handler,
             }
+
+
             console.log("NEW DEVICE", con);
           } catch (error) {
             console.log("tout caught", con);

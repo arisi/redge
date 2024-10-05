@@ -57,11 +57,10 @@ var stamp = () => {
       for (var aa of a.args) {
         params.push(`${aa.name}:${aa.size}`)
       }
-      //console.log(a.cmd, params.join());
-      cmds.push([a.cmd,  params.join()])
+      cmds.push([a.cmd,  a.descr, params.join()])
     }
     var table = new AsciiTable3()
-    .setHeading('Cmd', 'Args')
+    .setHeading('Cmd', 'Descr', 'Args')
     .addRowMatrix(cmds);
     console.log(table.toString());
     return

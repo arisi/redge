@@ -23,7 +23,6 @@ class RedgeIndex extends RedgeFront {
       });
     }
     var ind_state = async (a, b) => {
-      //console.log("cons", b.cons);
       for (var con of Object.keys(b.cons)) {
         if (!$_.devices[con]) {
           try {

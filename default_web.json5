@@ -22,10 +22,10 @@
 
   ],
   runners: {
-    duh123: {bin: './runners/duh.js', args: {id:123}},
-    duh555: {bin: './runners/duh.js', args: {id:555}},
-    duh222: {bin: './runners/duh.js', args: {id:222}},
-    duh333: {bin: './runners/duh.js', args: {id:333}},
+    r_mongoDb: {bin: './runners/r_mongoDb.js', args: {}},
+    // duh555: {bin: './runners/duh.js', args: {id:555}},
+    // duh222: {bin: './runners/duh.js', args: {id:222}},
+    // duh333: {bin: './runners/duh.js', args: {id:333}},
   },
   sockets: [
     {

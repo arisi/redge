@@ -21,6 +21,10 @@ const argv = yargs
     type: 'string',
     default: 'cli'
   })
+  .option('exec', {
+    description: 'exec a command',
+    type: 'string',
+  })
   .help()
   .alias('help', 'h').argv;
 function sleep(time) {
@@ -72,7 +76,12 @@ var dump_devs = () => {
       if (a.cmd == 'identity') continue;
       var params = []
       for (var aa of a.args) {
-        params.push(`${aa.name}:${aa.size}`)
+        if (aa.size)
+          params.push(`${aa.name}:${aa.size}`)
+        else if (aa.type)
+          params.push(`${aa.name}:${aa.type}`)
+        else
+          params.push(aa.name)
       }
       cmds.push([a.cmd, a.descr, params.join()])
     }
@@ -152,6 +161,11 @@ var dump_devs = () => {
     if (process.env.RUN) {
       console.log(`\nexec: '${process.env.RUN}':`);
       console.log(await eval(process.env.RUN))
+      process.exit()
+    }
+    if (argv.exec) {
+      console.log(`\nexec: '${argv.exec}':`);
+      console.log(await eval(argv.exec))
       process.exit()
     }
   });

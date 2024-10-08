@@ -5,6 +5,10 @@ class RedgeIndex extends RedgeFront {
     window.$_.devices = {}
     window.$$ = (cpu_id) => {
       var dev;
+      if (!cpu_id) {
+        dump_devs()
+        return
+      }
       if ($_.devices[cpu_id])
         dev = cpu_id;
       else {
@@ -12,6 +16,10 @@ class RedgeIndex extends RedgeFront {
         if (!dev) {
           dev = Object.keys($_.devices).find(key => $_.devices[key].cpu_id == cpu_id)
         }
+      }
+      if (!dev) {
+        dump_devs()
+        return
       }
       return $_.devices[dev].handler
     }
@@ -22,7 +30,44 @@ class RedgeIndex extends RedgeFront {
         });
       });
     }
-    var ind_state = async (a, b) => {
+
+
+    var dump_devs = () => {
+      var devs = []
+      for (var [d, o] of Object.entries($_.devices)) {
+        console.log(d, o);
+        devs.push([d, o.serno || ''])
+      }
+      var table = new AsciiTable()
+        .setHeading('Id', 'Serno')
+        .addRowMatrix(devs);
+      console.log(table.toString());
+    }
+
+    var helper = (key) => {
+      //console.log($_.devices[key].api);
+      var cmds = []
+      for (var a of $_.devices[key].api) {
+        if (a.cmd == 'identity') continue;
+        var params = []
+        for (var aa of a.args) {
+          if (aa.size)
+            params.push(`${aa.name}:${aa.size}`)
+          else if (aa.type)
+            params.push(`${aa.name}:${aa.type}`)
+          else
+            params.push(aa.name)
+        }
+        cmds.push([a.cmd, a.descr, params.join()])
+      }
+      var table = new AsciiTable("x")
+        .setHeading('Cmd', 'Descr', 'Args')
+        .addRowMatrix(cmds);
+      console.log(table.toString());
+      return
+    }
+
+    mq.req_ind("broker", 'state', async (a, b) => {
       for (var con of Object.keys(b.cons)) {
         if (!$_.devices[con]) {
           try {
@@ -31,22 +76,20 @@ class RedgeIndex extends RedgeFront {
             var handler = {}
             for (var a of api) {
               var args = []
-              var params= []
+              var params = []
               for (var aa of a.args) {
                 args.push(aa.name)
                 params.push(`"${aa.name}":${aa.name}`)
               }
               handler[a.cmd] = eval(`async (${args.join()}) => { return await mq.req("${con}", ['${a.cmd}',{${params}}], {}) }`)
             }
+            handler.help = eval(`() => { return helper("${con}") }`)
 
             $_.devices[con] = {
               connected: c.connected,
               api,
               handler,
             }
-
-
-            console.log("NEW DEVICE", con);
           } catch (error) {
             console.log("tout caught", con);
           }
@@ -61,7 +104,7 @@ class RedgeIndex extends RedgeFront {
                 o.syms = JSON5.parse(await getSync(`artefact/${o.af}/syms.json5`));
                 o.hws = JSON5.parse(await getSync(`artefact/${o.af}/hw.json5`));
               }
-              emit_button_event('DEVICE_UPDATED', {con, ...$_.devices[con]});
+              emit_button_event('DEVICE_UPDATED', { con, ...$_.devices[con] });
             }
           }
         }
@@ -80,9 +123,7 @@ class RedgeIndex extends RedgeFront {
           delete $_.devices[dev]
         }
       }
-    }
-
-    mq.req_ind("broker", 'state', ind_state)
+    })
   }
   deconstructor() {
     console.log("***** deconstructor indeksi");

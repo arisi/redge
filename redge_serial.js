@@ -116,7 +116,7 @@ runner = (tty, driver) => {
 
     //mq.publish(`/ind/${argv.id}/lost`, { path: id })
 
-    aedes.publish({
+    serial_mq.publish({
       topic: `/ind/${argv.id}/lost`,
       payload: JSON.stringify({ path: id }),
       retain: false,
@@ -139,6 +139,13 @@ config = (_argv) => {
   rt0s = require('rt0s_js');
   serial_mq = new rt0s(argv.rt0s, argv.id + "_serial", "demo", "demo");
   console.log('Connected to Broker at', argv.rt0s);
+  serial_mq.registerSyncAPI("duts", "list DUT:s", [], (msg) => {
+    var ret = []
+    for (var [key, o] of Object.entries(g_ports)) {
+      ret.push(o.id)
+    }
+    return ret
+  });
 
 }
 

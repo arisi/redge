@@ -112,20 +112,15 @@ var dump_devs = () => {
               args.push(aa.name)
               params.push(`"${aa.name}":${aa.name}`)
             }
-            var s = `async (${args.join()}) => { return mq.req_sync("${con}", ['${a.cmd}',{${params}}], {}) }`
-            handler[a.cmd] = eval(s)
+            handler[a.cmd] = eval(`async (${args.join()}) => { return mq.req_sync("${con}", ['${a.cmd}',{${params}}], {}) }`)
           }
-          var s = `() => { return helper("${con}") }`
-          handler.help = eval(s)
+          handler.help = eval(`() => { return helper("${con}") }`)
 
           $_.devices[con] = {
             connected: c.connected,
             api,
             handler,
           }
-
-
-          //console.log("NEW DEVICE", con);
         } catch (error) {
           console.log("tout caught", con, error);
         }

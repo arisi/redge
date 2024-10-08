@@ -129,14 +129,6 @@ if (!argv.rt0s) {
   }
   redge_serial.config(argv);
   redge_serial.poll();
-  redge_mqtt_service.registerAPI("duts", "list DUT:s", [], (msg) => {
-    var ret = []
-    for (var [key, o] of Object.entries(redge_serial.g_ports)) {
-      ret.push(o.id)
-    }
-    return ret
-  });
-
   aedes = redge_mqtt_service.config(argv, conf)
   redge_web_service.config(argv, conf, web_conf, aedes)
   redge_runner_service.config(argv, conf, web_conf, aedes)

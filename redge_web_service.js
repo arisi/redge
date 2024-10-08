@@ -20,6 +20,7 @@ const log = console.log.bind(console);
 
 const certs = {}
 var aedes;
+var web_mq;
 var conf;
 var web_conf
 const home_dir = os.homedir();
@@ -397,7 +398,7 @@ var start_services = () => {
                 var payload = ""
                 if (event != 'deleted')
                   payload = fs.readFileSync(path).toString()
-                aedes.publish({
+                  web_mq.publish({
                   topic: `/ind/site_${u.name}/updates`,
                   payload: JSON.stringify({event, fn, payload}),
                   retain: false,
@@ -498,6 +499,12 @@ config = (_argv, _conf, _web_conf, _aedes) => {
   conf = _conf;
   aedes = _aedes;
   web_conf = _web_conf;
+  rt0s = require('rt0s_js');
+  web_mq = new rt0s(argv.rt0s, argv.id + "_web", "demo", "demo");
+  console.log('Connected to Broker at', argv.rt0s);
+  web_mq.registerSyncAPI("poks", "Count Records", [], async (msg) => {
+    return "jesp!"
+  });
   start_services()
 }
 

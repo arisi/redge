@@ -131,6 +131,6 @@ if (!argv.rt0s) {
   redge_serial.poll();
   aedes = redge_mqtt_service.config(argv, conf)
   redge_web_service.config(argv, conf, web_conf, aedes)
-  redge_runner_service.config(argv, conf, web_conf, aedes)
+  redge_runner_service.config(argv, conf, web_conf)
 
 })();

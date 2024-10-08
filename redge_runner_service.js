@@ -8,7 +8,6 @@ const log = console.log.bind(console);
 var { AsciiTable3, AlignmentEnum } = require('ascii-table3');
 const { spawn, execSync } = require('child_process');
 
-var aedes;
 var conf;
 var web_conf
 var runners
@@ -116,10 +115,9 @@ runner_tick = () => {
   setTimeout(runner_tick, 1000);
 }
 
-config = (_argv, _conf, _web_conf, _aedes) => {
+config = (_argv, _conf, _web_conf) => {
   argv = _argv;
   conf = _conf;
-  aedes = _aedes;
   web_conf = _web_conf;
   runners = conf.runners;
   console.log(`Runner Services Started.. `, runners)
@@ -138,6 +136,7 @@ config = (_argv, _conf, _web_conf, _aedes) => {
     do_runner(r, o);
   }
   runner_tick();
+
   runner_mq.registerSyncAPI('list_runners', "Get Runners", [], msg => {
     console.log('Runners?', runners)
     var ret = {}
@@ -161,6 +160,7 @@ config = (_argv, _conf, _web_conf, _aedes) => {
     }
     return ret
   })
+
   runner_mq.registerSyncAPI('kill_runner', "Kill a Runner", [
     { name: 'id', type: 'string' },
   ], msg => {
@@ -183,6 +183,7 @@ config = (_argv, _conf, _web_conf, _aedes) => {
     }
     return ret
   })
+
   runner_mq.registerAPI('run_once', "Run a One-Shot Runner", [
     { name: 'id', type: 'string' },
     { name: 'args', type: 'json' },
@@ -210,11 +211,6 @@ config = (_argv, _conf, _web_conf, _aedes) => {
     } catch (error) {
       console.error("runners lost?");
     }
-
-    // msg['reply'] = ret
-    // setTimeout(() => {
-    //   runner_mq.publish(`/up/${msg['src']}/${msg['mid']}`, msg);
-    // }, 1000);
     return null;
   })
 }

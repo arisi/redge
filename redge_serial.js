@@ -9,6 +9,7 @@ var g_ports = {};
 var tick = 0;
 var argv = {}
 var win = os.platform() == "win32";
+var serial_mq
 
 var filter_path = (p) => {
   var hit = false;
@@ -135,6 +136,10 @@ add = async (p, type) => {
 
 config = (_argv) => {
   argv = _argv;
+  rt0s = require('rt0s_js');
+  serial_mq = new rt0s(argv.rt0s, argv.id + "_serial", "demo", "demo");
+  console.log('Connected to Broker at', argv.rt0s);
+
 }
 
 poll = async () => {

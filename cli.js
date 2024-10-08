@@ -91,6 +91,7 @@ var dump_devs = () => {
     console.log(table.toString());
     return
   }
+  duh = true;
 
   mq.req_ind("broker", 'state', async (a, b) => {
     for (var con of Object.keys(b.cons)) {
@@ -158,13 +159,15 @@ var dump_devs = () => {
         }
       }
     }
-    if (process.env.RUN) {
+    if (process.env.RUN && duh) {
       console.log(`\nexec: '${process.env.RUN}':`);
+      duh=false
       console.log(await eval(process.env.RUN))
       process.exit()
     }
-    if (argv.exec) {
-      console.log(`\nexec: '${argv.exec}':`);
+    if (argv.exec && duh) {
+      console.log(`\nexec ${duh}: '${argv.exec}':`);
+      duh=false
       console.log(await eval(argv.exec))
       process.exit()
     }

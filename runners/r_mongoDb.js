@@ -57,6 +57,12 @@ async function main() {
       return { error: `Not Found` };
     return ret
   });
+  mq.registerSyncAPI("count", "Count Records", [
+    { name: 'query', type: 'json' },
+  ], async (msg) => {
+    var ret = await c.countDocuments(msg.req.args[1].query)
+    return ret
+  });
   mq.registerSyncAPI("find", "Find Multiple Records", [
     { name: 'query', type: 'json' },
     { name: 'limit', default: 10 },

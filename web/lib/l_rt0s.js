@@ -29,7 +29,7 @@ window.Rt0s = class Rt0s {
         .then(fp => fp.get())
         .then(result => {
           this.cpu_id = result.visitorId
-          this._cid = this._app + ":" + result.visitorId + "_" + (Rt0s.stamp().toString())
+          this._cid = result.visitorId + "_" + (Rt0s.stamp().toString()+ ":" +this._app )
           this.do_connect(this._uid, this._pw)
         })
     } else

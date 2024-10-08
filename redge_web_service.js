@@ -500,7 +500,7 @@ config = (_argv, _conf, _web_conf, _aedes) => {
   aedes = _aedes;
   web_conf = _web_conf;
   rt0s = require('rt0s_js');
-  web_mq = new rt0s(argv.rt0s, argv.id + "_web", "demo", "demo");
+  web_mq = new rt0s(argv.rt0s, argv.id + ":web:daemon", "demo", "demo");
   console.log('Connected to Broker at', argv.rt0s);
   web_mq.registerSyncAPI("poks", "Count Records", [], async (msg) => {
     return "jesp!"

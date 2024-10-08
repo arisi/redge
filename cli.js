@@ -7,7 +7,16 @@ const JSON5 = require('json5');
 rt0s = require('rt0s_js');
 var { AsciiTable3, AlignmentEnum } = require('ascii-table3');
 
-var term = true
+uuidv4 = () => {
+  var result, i, j
+  result = ''
+  for (j = 0; j < 32; j++) {
+    if (j == 8 || j == 12 || j == 16 || j == 20) result = result + '-'
+    i = Math.floor(Math.random() * 16).toString(16).toUpperCase()
+    result = result + i
+  }
+  return result
+}
 const argv = yargs
   .option('rt0s', {
     alias: 'r',
@@ -19,7 +28,7 @@ const argv = yargs
     alias: 'i',
     description: 'rt0s node id',
     type: 'string',
-    default: 'cli'
+    default: uuidv4() + ':cli'
   })
   .option('exec', {
     description: 'exec a command',
@@ -36,7 +45,6 @@ var stamp = () => {
 var dump_devs = () => {
   var devs = []
   for (var [d, o] of Object.entries($_.devices)) {
-    console.log(d, o);
     devs.push([d, o.serno || ''])
   }
   var table = new AsciiTable3()
@@ -156,15 +164,19 @@ var dump_devs = () => {
     }
     if (process.env.RUN && duh) {
       console.log(`\nexec: '${process.env.RUN}':`);
-      duh=false
+      duh = false
       console.log(await eval(process.env.RUN))
       process.exit()
     }
-    if (argv.exec && duh) {
+    else if (argv.exec && duh) {
       console.log(`\nexec ${duh}: '${argv.exec}':`);
-      duh=false
+      duh = false
       console.log(await eval(argv.exec))
       process.exit()
+    }
+    else if (duh) {
+      dump_devs();
+      duh = false;
     }
   });
 

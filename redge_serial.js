@@ -59,7 +59,7 @@ runner = (tty, driver) => {
   var ttys = tty.replace(/\/dev\//g, '').replace(/\//g, '_');
   var fn = `log/${ttys}.log`
   var raf, s
-  var id = `${argv.id}:${driver}:${ttys}`
+  var id = `${argv.id}:${ttys}:${driver}:device`
   if (!win) {
     raf = `./redge_serial_${driver}.js`
     s = `--schema ${argv.schema} --rt0s ${argv.rt0s} --id ${id} --port ${tty}`;
@@ -137,7 +137,7 @@ add = async (p, type) => {
 config = (_argv) => {
   argv = _argv;
   rt0s = require('rt0s_js');
-  serial_mq = new rt0s(argv.rt0s, argv.id + "_serial", "demo", "demo");
+  serial_mq = new rt0s(argv.rt0s, argv.id + ":serial:daemon", "demo", "demo");
   console.log('Connected to Broker at', argv.rt0s);
   serial_mq.registerSyncAPI("duts", "list DUT:s", [], (msg) => {
     var ret = []

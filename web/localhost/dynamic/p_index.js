@@ -35,7 +35,6 @@ class RedgeIndex extends RedgeFront {
     var dump_devs = () => {
       var devs = []
       for (var [d, o] of Object.entries($_.devices)) {
-        console.log(d, o);
         devs.push([d, o.serno || ''])
       }
       var table = new AsciiTable()

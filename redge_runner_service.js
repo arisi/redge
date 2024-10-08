@@ -40,22 +40,32 @@ do_runner = (name, r) => {
   runners[name].runs += 1;
   runners[name].start = stamp();
   runners[name].stopped = 0;
+  runners[name].stdout=[]
+  runners[name].stderr = []
+  if (runners[name].req_msg) {
+    runners[name].last_exit_code = 0;
+    runners[name].last_error_message = '';
+  }
   const child = spawn(r.bin, s.split(' '));
-  var sss = ""
   child.stdout.on('data', (s) => {
-    sss += s.toString().replace('\r', '')
+    var sss = s.toString().replace('\r', '')
     if (sss.indexOf('\n') != -1) {
       for (var ss of sss.split('\n'))
         if (ss.length > 1) {
-          log(`>>${ss}`)
+          runners[name].stdout.push(ss)
         }
-      sss = ""
     }
   });
   runners[name].child = child;
 
-  child.stderr.on('data', (data) => {
-    log(`STDERR??: ${data}\n`)
+  child.stderr.on('data', (s) => {
+    var sss = s.toString().replace('\r', '')
+    if (sss.indexOf('\n') != -1) {
+      for (var ss of sss.split('\n'))
+        if (ss.length > 1) {
+          runners[name].stderr.push(ss)
+        }
+    }
   });
 
   child.on('error', (error) => {
@@ -81,6 +91,8 @@ do_runner = (name, r) => {
         dur: (runners[name].stopped - runners[name].start) / 1000,
         last_exit_code: runners[name].last_exit_code,
         last_signal: runners[name].last_signal,
+        stdout: runners[name].stdout,
+        stderr: runners[name].stderr,
       }
       runner_mq.publish(`/up/${runners[name].req_msg['src']}/${runners[name].req_msg['mid']}`, runners[name].req_msg);
       runners[name].req_msg = undefined;
@@ -122,14 +134,14 @@ config = (_argv, _conf, _web_conf) => {
   runners = conf.runners;
   console.log(`Runner Services Started.. `, runners)
   rt0s = require('rt0s_js');
-  runner_mq = new rt0s(argv.rt0s, argv.id + "_runner", "demo", "demo");
+  runner_mq = new rt0s(argv.rt0s, argv.id + ":runner:daemon", "demo", "demo");
   console.log('Connected to Broker at', argv.rt0s);
   runner_mq.registerSyncAPI("poks", "Count Records", [], async (msg) => {
     return "jesp"
   });
 
   for (var [r, o] of Object.entries(runners)) {
-    o.id = `${argv.id}_${r}`;
+    o.id = `${argv.id}:${r}:runner`;
     o.runs = 0;
     console.log(`run '${r}'`, o)
     if (o.oneshot) continue;

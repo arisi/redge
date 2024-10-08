@@ -33,8 +33,12 @@ console.log('duh Connected to Broker at', argv.rt0s);
 sleep = (time) => {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
+console.log("exitin...");
+console.log("now");
+process.exit(-3);
 
-setInterval(() => {
-  //console.log("duh tick", argv.name, tick++);
-},1000)
+// setInterval(() => {
+//   console.log("duh tick", argv.name, tick++);
+//   process.exit(-2);
+// },1000)
 

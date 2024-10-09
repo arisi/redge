@@ -224,13 +224,16 @@ class rt0s:
 
 
 if __name__ == "__main__":
-    print("OKE")
-    mq = rt0s("ws://localhost:8092", username="demo", password="demo", client_id="pyx")
-    #if not dut:
-    ret = mq.call('dev:runner:daemon' ,[".list_runners", { } ])
-    dut = ret[0]
-    # self.dut = dut
-    # if cb_indication:
-    #   self.mq.req_ind(self.dut, '+', cb_indication)
-    # else:
-    #   self.mq.req_ind(self.dut, '+', self.indd)
+  mq = rt0s("ws://localhost:8092", username="demo", password="demo", client_id="pyx")
+  # ret = mq.call('dev:runner:daemon' ,["list_runners", { } ])
+  # print(ret)
+  # ret = mq.call('dev:runner:daemon' ,["api", { } ])
+  # print(ret)
+  def cb_indication(id, obj):
+    if id == "broker" and obj["topic"] == "state":
+      for key in obj['cons']:
+        print("ind:", id, key,obj['cons'][key]['indications'])
+    print("")
+    return
+  mq.req_ind("broker", '+', cb_indication)
+

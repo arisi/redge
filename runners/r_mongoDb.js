@@ -27,15 +27,8 @@ const argv = yargs
   .help()
   .alias('help', 'h').argv;
 
-if (!argv.id) {
-  console.error("Need to give name and id");
-  process.exit(-1);
-}
-
 mq = new rt0s(argv.rt0s, argv.id, "demo", "demo");
 console.log('r_mongoDb Connected to Broker at', argv.rt0s);
-
-
 
 async function main() {
   const client = new MongoClient(uri, {

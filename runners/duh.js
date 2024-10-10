@@ -14,6 +14,10 @@ const argv = yargs
     description: 'Broker Id',
     type: 'string',
   })
+  .option('args', {
+    description: 'args',
+    type: 'string',
+  })
   .option('rt0s', {
     alias: 'r',
     description: 'rt0s broker to use',
@@ -33,7 +37,14 @@ console.log('duh Connected to Broker at', argv.rt0s);
 sleep = (time) => {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
-console.log("exitin...");
+if (argv.args) {
+  for (var [k,v] of Object.entries(JSON.parse(argv.args))) {
+    console.log("puttin args",k,v);
+    argv.k = v;
+  }
+}
+console.log("exitin...", JSON.stringify(argv));
+process.stderr.write("ERR\n")
 console.log("now");
 process.exit(-3);
 

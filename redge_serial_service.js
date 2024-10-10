@@ -8,47 +8,68 @@ const os = require('os')
 var g_ports = {};
 var tick = 0;
 var argv = {}
+var conf = {}
 var win = os.platform() == "win32";
 var serial_mq
 
 var filter_path = (p) => {
-  var hit = false;
-  if (argv.serial_path != '')
-    if (p.path.match(new RegExp(argv.serial_path)))
-      hit = true;
-  if (argv.serial_vendor == p.vendorId) {
-    hit = true;
+  //var hit = false;
+  for (var port of conf.ports) {
+    if (p.path.match(new RegExp(port.path))) {
+      //console.log("hits port",port);
+      return port;
+    }
   }
-  if ((argv.serial_product == p.productId) && (argv.serial_vendor == p.vendorId))
-    hit = true;
-  if (argv.serial_sernos && ((argv.serial_sernos.split(',').indexOf(p.serialNumber)) != -1))
-    hit = true;
-  return hit;
+  return false;
+  // if (argv.serial_path != '')
+  //   if (p.path.match(new RegExp(argv.serial_path)))
+  //     hit = true;
+  // if (argv.serial_vendor == p.vendorId) {
+  //   hit = true;
+  // }
+  // if ((argv.serial_product == p.productId) && (argv.serial_vendor == p.vendorId))
+  //   hit = true;
+  // if (argv.serial_sernos && ((argv.serial_sernos.split(',').indexOf(p.serialNumber)) != -1))
+  //   hit = true;
+  // return hit;
 }
 
-scan = async () => {
+scan_ports = async (table) => {
   var serialList
   serialList = await SerialPort.list();
   var ports = []
   for (var p of serialList) {
     if (p.vendorId) {
       var state = ""
-      var hit = filter_path(p);
+      var port = filter_path(p);
       if (p.path in g_ports) {
         if (g_ports[p.path].live)
           state = "online"
         else
           state = "offline"
       }
-      ports.push([p.path, `0x${p.vendorId}`, `0x${p.productId}`, p.serialNumber || "", p.manufacturer || "", hit ? 'in_use': 'ignored', state])
+      if (table)
+        ports.push([p.path, `0x${p.vendorId}`, `0x${p.productId}`, p.serialNumber || "", p.manufacturer || "", port !== false ? port.type: 'ignored', state])
+      else
+        ports.push({
+          path:p.path, 
+          vendor_idd: `0x${p.vendorId}`, 
+          product_id: `0x${p.productId}`, 
+          serial_number: p.serialNumber || "",
+          manufacturer: p.manufacturer || "", 
+          type: port !== false ? port.type : 'ignored',
+          state})
     }
   }
-
-  var table = new AsciiTable3()
-    .setHeading('Path', 'Vendor', 'Product', 'Serial', 'Manufacturer', 'Usage', ' State')
+  if (table) {
+    var table = new AsciiTable3()
+    .setHeading('Path', 'Vendor', 'Product', 'Serial', 'Manufacturer', 'Type', ' State')
     .addRowMatrix(ports);
-  console.log(table.toString());
+    return table.toString();
+  }
+  return ports;
 }
+
 var tty_logger = (tty, s) => {
   var dd = new Date(stamp()).toISOString()
   var fn = `log/${tty}_${dd.slice(0, 10)}.log`
@@ -130,12 +151,13 @@ runner = (tty, driver) => {
 add = async (p, type) => {
   runner(p, type);
   console.log("\nScanning Serial Ports after adding", p);
-  await scan();
+  console.log(await scan_ports(true));
 }
 
 
-config = (_argv) => {
+config = (_argv, _conf) => {
   argv = _argv;
+  conf = _conf
   rt0s = require('rt0s_js');
   serial_mq = new rt0s(argv.rt0s, argv.id + ":serial:daemon", "demo", "demo");
   console.log('Connected to Broker at', argv.rt0s);
@@ -146,7 +168,13 @@ config = (_argv) => {
     }
     return ret
   });
-
+  serial_mq.registerSyncAPI("scan_ports", "List Detected Serial Ports", [
+    { name: 'tabular'},
+  ], (msg) => {
+    var tabular = msg.req.args[1].tabular;
+    return scan_ports(tabular);
+  });
+  console.log(conf.ports);
 }
 
 poll = async () => {
@@ -160,13 +188,13 @@ poll = async () => {
     return;
   }
   for (var p of serialList) {
-    if (filter_path(p)) {
+    if (port = filter_path(p)) {
       if (!g_ports[p.path]) {
         g_ports[p.path] = p
         g_ports[p.path].lost = tick;
       } else if (!g_ports[p.path].live && (g_ports[p.path].lost + 20 < tick)) {
         g_ports[p.path].live = tick;
-        add(p.path, 'hdlc');
+        add(p.path, port.type);
       } else if (g_ports[p.path].live) {
         g_ports[p.path].live = tick;
       }
@@ -177,15 +205,15 @@ poll = async () => {
       g_ports[path].lost = g_ports[path].live;
       g_ports[path].live = false;
       console.log("\nScanning Serial Ports after removing", path);
-      scan();
+      console.log(await scan_ports(true));
     }
   }
-  setTimeout(poll, 200);
+  setTimeout(poll, 200);  
 }
 
 module.exports = {
   config,
-  scan,
+  scan_ports,
   poll,
   g_ports,
 }

@@ -34,7 +34,11 @@ uuidv4 = () => {
 }
 
 do_runner = (name, r) => {
-  s = `--name ${name} --id ${r.id} --rt0s ${argv.rt0s}`;
+  var args_sum={
+    ...runners[name].args,
+    ...runners[name].args_run,
+  }
+  s = `--name ${name} --id ${r.id} --rt0s ${argv.rt0s} --args="${JSON.stringify(args_sum)}"`;
   console.log("runner", r.bin, s);
 
   runners[name].runs += 1;
@@ -99,6 +103,7 @@ do_runner = (name, r) => {
     }
   });
 }
+
 runner_tick = () => {
   var runs = [];
   for (var [r, o] of Object.entries(runners)) {
@@ -207,14 +212,15 @@ config = (_argv, _conf, _web_conf) => {
     try {
       for (var [k, o] of Object.entries(runners)) {
         if ((o.id == id) && o.oneshot && (!o.pid)) {
-          o.args = args;
-          console.log('running one-shot Runner', k, args)
+          o.args_run = args;
+          console.log('running one-shot Runner', k, o.args, args)
           // o.child.kill('SIGINT')
           do_runner(k, o);
           ret.push({
             bin: o.bin,
             id: o.id,
             args: o.args,
+            args_run: o.args_run,
             pid: o.child ? o.child.pid : 0,
           })
           o.req_msg = msg;

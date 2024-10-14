@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 
-const fs = require('fs')
+const sprintf = require('sprintf')
 const yargs = require('yargs')
-const os = require('os')
 const JSON5 = require('json5');
 rt0s = require('rt0s_js');
 var { AsciiTable3, AlignmentEnum } = require('ascii-table3');
@@ -21,7 +20,8 @@ const argv = yargs
   .option('rt0s', {
     alias: 'r',
     description: 'rt0s broker to use',
-    default: 'mqtt://localhost:8091',
+    //default: 'mqtt://localhost:8091',
+    default: 'ws://localhost:8192',
     type: 'string'
   })
   .option('id', {
@@ -100,6 +100,18 @@ var dump_devs = () => {
     return
   }
   duh = true;
+  mq.req_ind('+', 'log_write', (a, b) => {
+    var now = stamp()
+    d = new Date(now).toISOString()
+    try {
+      //duts[b.device].ident.serno
+      //box.pushLine( sprintf("%s %-9d %-3d %s", d, b.tick, b.lseq, b.data));
+      console.log(sprintf("%s %-12s '%s'", d, $_.devices[b.device].serno, b.data));
+
+     } catch (error) {
+
+     }
+  })
 
   mq.req_ind("broker", 'state', async (a, b) => {
     for (var con of Object.keys(b.cons)) {

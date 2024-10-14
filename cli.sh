@@ -1,1 +1,1 @@
-node -r ./cli.js 
+node -r ./cli.js

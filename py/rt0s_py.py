@@ -4,7 +4,6 @@ import paho.mqtt.client as mqtt
 import uuid, time, threading, json, re
 from threading import Thread, Lock
 from urllib.parse import urlparse
-import signal
 
 class rt0s:
   apis = {}

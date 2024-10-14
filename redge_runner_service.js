@@ -108,7 +108,7 @@ runner_tick = () => {
   var runs = [];
   for (var [r, o] of Object.entries(runners)) {
     //console.log(`runner_tick '${r}'`, o)
-    if (o.oneshot) continue;
+    if (!o.run) continue;
     if (!o.child) {
       if (stamp() - runners[r].stopped > 5000) {
         console.log("dead runner", r);
@@ -149,7 +149,7 @@ config = (_argv, _conf, _web_conf) => {
     o.id = `${argv.id}:${r}:runner`;
     o.runs = 0;
     console.log(`run '${r}'`, o)
-    if (o.oneshot) continue;
+    if (!o.run) continue;
     do_runner(r, o);
   }
   runner_tick();
@@ -163,7 +163,7 @@ config = (_argv, _conf, _web_conf) => {
           bin: o.bin,
           runs: o.runs,
           start: o.start,
-          oneshot: o.oneshot,
+          run: o.run,
           stopped: o.stopped,
           args: o.args,
           last_error_message: o.last_error_message,
@@ -178,7 +178,7 @@ config = (_argv, _conf, _web_conf) => {
     return ret
   })
 
-  runner_mq.registerSyncAPI('kill_runner', "Kill a Runner", [
+  runner_mq.registerSyncAPI('kill', "Kill a Runner", [
     { name: 'id', type: 'string' },
   ], msg => {
     var id = msg.req.args[1].id;
@@ -187,12 +187,14 @@ config = (_argv, _conf, _web_conf) => {
     try {
       for (var [k, o] of Object.entries(runners)) {
         if (o.id == id) {
-          console.log('killin Runner', k, o.child.pid)
-          o.child.kill('SIGINT')
-          ret.push({
-            bin: o.bin,
-            id: o.id,
-          })
+          if (o.child) {
+            console.log('killin Runner', k, o.child.pid)
+            o.child.kill('SIGINT')
+            ret.push({
+              bin: o.bin,
+              id: o.id,
+            })
+          }
         }
       }
     } catch (error) {
@@ -201,35 +203,46 @@ config = (_argv, _conf, _web_conf) => {
     return ret
   })
 
-  runner_mq.registerAPI('run_once', "Run a One-Shot Runner", [
+  runner_mq.registerAPI('run', "Run a Runner", [
+    { name: 'once' },
     { name: 'id', type: 'string' },
     { name: 'args', type: 'json' },
   ], msg => {
+    var once = msg.req.args[1].once;
     var id = msg.req.args[1].id;
     var args = msg.req.args[1].args;
-    console.log('Run OneShot Runner', id, args)
+    console.log('Run a Runner', id, args)
     var ret = []
     try {
       for (var [k, o] of Object.entries(runners)) {
-        if ((o.id == id) && o.oneshot && (!o.pid)) {
+        if ((o.id == id) && (!o.run) && (!o.pid)) {
           o.args_run = args;
-          console.log('running one-shot Runner', k, o.args, args)
-          // o.child.kill('SIGINT')
+          console.log('running a Runner', k, o.args, args)
+          if (o.child) {
+            return {error: "already running", pid:o.child.pid}
+          }
           do_runner(k, o);
           ret.push({
+            once,
             bin: o.bin,
             id: o.id,
             args: o.args,
             args_run: o.args_run,
             pid: o.child ? o.child.pid : 0,
           })
-          o.req_msg = msg;
+          if (once)
+            o.req_msg = msg; // causes exit to send result message
+          else
+            return ret
         }
       }
     } catch (error) {
       console.error("runners lost?");
     }
-    return null;
+    if (once)
+      return null;
+    else
+      return {}
   })
 }
 

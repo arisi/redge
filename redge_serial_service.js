@@ -52,11 +52,11 @@ scan_ports = async (table) => {
         ports.push([p.path, `0x${p.vendorId}`, `0x${p.productId}`, p.serialNumber || "", p.manufacturer || "", port !== false ? port.type: 'ignored', state])
       else
         ports.push({
-          path:p.path, 
-          vendor_idd: `0x${p.vendorId}`, 
-          product_id: `0x${p.productId}`, 
+          path:p.path,
+          vendor_idd: `0x${p.vendorId}`,
+          product_id: `0x${p.productId}`,
           serial_number: p.serialNumber || "",
-          manufacturer: p.manufacturer || "", 
+          manufacturer: p.manufacturer || "",
           type: port !== false ? port.type : 'ignored',
           state})
     }
@@ -174,6 +174,9 @@ config = (_argv, _conf) => {
     var tabular = msg.req.args[1].tabular;
     return scan_ports(tabular);
   });
+  conf.runners['duhx'] = {
+    bin: './runners/duh.js', args: {id:555},
+  }
   console.log(conf.ports);
 }
 
@@ -208,7 +211,7 @@ poll = async () => {
       console.log(await scan_ports(true));
     }
   }
-  setTimeout(poll, 200);  
+  setTimeout(poll, 200);
 }
 
 module.exports = {

@@ -1,7 +1,7 @@
 {
   jwt_secret: 'demo123',
   acme_home: '~/.acme.sh/',
-  urls: ['localhost','loractive.io','dev.rt0s.com','ari.rt0s.com'],
+  urls: ['localhost','loractive.io','dev.rt0s.com','ari.rt0s.com','www.ztereoid.net'],
   users: [
     {
       username: 'anon',
@@ -18,13 +18,13 @@
       max_sessions: 6
     }
   ],
-  libs: [
-
+  ports: [
+    {path: '/dev/tty.usbserial-FTD3SEN6x', type: 'hdlc', baudrate:9600}
   ],
   runners: {
-    r_mongoDb: {bin: './runners/r_mongoDb.js', args: {}},
-    // duh555: {bin: './runners/duh.js', args: {id:555}},
-    // duh222: {bin: './runners/duh.js', args: {id:222}},
+    r_mongoDb: {bin: './runners/r_mongoDb.js', args: {}, run:true},
+    duh555: {bin: './runners/duh.js', args: {id:555}},
+    r_serial_hdlc: {bin: './runners/r_serial_hdlc.js', args: {schema: 'base_mqtt.json5'}},
     // duh333: {bin: './runners/duh.js', args: {id:333}},
   },
   sockets: [
@@ -41,7 +41,7 @@
         {
           name: 'ari',
           static: 'web/localhost',
-          urls: ['ari.rt0s.com']
+          urls: ['ari.rt0s.com','www.ztereoid.net']
         }
       ]
     },
@@ -53,7 +53,7 @@
         {
           name: 'loractive.io',
           static: 'web/localhost',
-          urls: ['loractive.io','dev.rt0s.com']
+          urls: ['loractive.io','dev.rt0s.com','www.ztereoid.net','ztereoid.net','dev.ztereoid.net']
         }
       ]
     },

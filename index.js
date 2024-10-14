@@ -124,6 +124,7 @@ if (!argv.rt0s) {
 (async () => {
   if (argv.scan) {
     console.log("Scanning Serial Ports:");
+    redge_serial.config(argv, conf);
     console.log(await redge_serial.scan_ports(true));
     process.exit(0);
   }

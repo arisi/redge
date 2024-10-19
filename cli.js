@@ -104,12 +104,21 @@ var dump_devs = () => {
     var now = stamp()
     d = new Date(now).toISOString()
     try {
-      //duts[b.device].ident.serno
-      //box.pushLine( sprintf("%s %-9d %-3d %s", d, b.tick, b.lseq, b.data));
-      console.log(sprintf("%s %-12s '%s'", d, $_.devices[b.device].serno, b.data));
+      var serno = "?"
+      if (b.device in $_.devices)
+        serno = $_.devices[b.device].serno
+      var s = ""
+      if (b.bdata) {
+        s="["
+        for (byte of b.bdata) {
+          s+=sprintf("%02X ", byte.charCodeAt(0))
+        }
+        s += "]"
+      }
+      console.log(sprintf("%s %-12s #%d %s '%s'", d, serno, b.stream, s, b.data));
 
      } catch (error) {
-
+      console.error("?",error);
      }
   })
 
@@ -121,7 +130,7 @@ var dump_devs = () => {
           try {
             var api = await mq.req_sync(con, ['api', {}], {})
           } catch (error) {
-            console.log("no api from", con);
+            //console.log("no api from", con);
             continue;
           }
           var handler = {}

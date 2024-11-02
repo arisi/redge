@@ -22,7 +22,7 @@ binho.leds[1].setRGB(red, green, blue)
 
 binho.operationMode = "I2C"
 binho.i2c.frequency = 100000
-binho.i2c.useInternalPullUps = True
+binho.i2c.useInternalPullUps = False
 
 def init():
   writeData = [0xa1]
@@ -35,6 +35,7 @@ def init():
 def do_tx(obj):
   args = obj['req']['args'][1]
   print("sent i2c", obj)
+  print("***PAYLOAD", args['payload'])
   try:
     binho.i2c.write(args['address'], args['payload'])
 
@@ -120,8 +121,8 @@ if len(scanResults) > 0:
 
     print(rcvdBytes)
     print()
-
-  if True:
+  writeData = [0x61,0x55,0x77]
+  if False:
     #init()
     for _ in range(2):
       time.sleep(1)

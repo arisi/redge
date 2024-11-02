@@ -378,7 +378,6 @@ main = async (pfn) => {
               mq.publish(`/ind/${argv.id}/${msg.topic}`, msg)
             }
           } else {
-            console.log("IND:", JSON.stringify(msg));
             if (msg.topic == "identity") {
               try {
                 //schema = mqttsn.init(`bin/${msg.sw}-${msg.sw_rev}-schema.json5`)
@@ -390,6 +389,7 @@ main = async (pfn) => {
                 console.log("no schema2 :(",sfn);
               }
             }
+            console.log("IND!!:", `/ind/${argv.id}/${msg.topic}`, JSON.stringify(msg));
             mq.publish(`/ind/${argv.id}/${msg.topic}`, msg)
           }
           console.log("");

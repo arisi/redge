@@ -19,7 +19,7 @@
     }
   ],
   ports: [
-    {path: '/dev/tty.usbserial-FTD3SEN6x', type: 'hdlc', baudrate:9600}
+    {path: '/dev/tty.usbserial-FTD3SEN6', type: 'hdlc', baudrate: 38400}
   ],
   runners: {
     r_mongoDb: {bin: './runners/r_mongoDb.js', args: {}, run:true},

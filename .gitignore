@@ -14,3 +14,4 @@ py/pyvenv.cfg
 py/.*
 py/__pycache__/**
 py/share/**
+**/artefact/**

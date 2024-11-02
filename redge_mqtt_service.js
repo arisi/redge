@@ -67,11 +67,11 @@ var send_ind_state = () => {
     } else
       rows.push([name, timed((stamp() - o.connected) / 1000),"",""])
   }
-  var table = new AsciiTable3()
-    .setHeading('Name', 'Uptime', 'Serno', 'Af')
-    .addRowMatrix(rows);
-  console.log(table.toString());
-}
+//   var table = new AsciiTable3()
+//     .setHeading('Name', 'Uptime', 'Serno', 'Af')
+//     .addRowMatrix(rows);
+//   console.log(table.toString());
+ }
 
 aedes.on('client', function(client) {
 })

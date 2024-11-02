@@ -36,6 +36,10 @@ const argv = yargs
   })
   .help()
   .alias('help', 'h').argv;
+if (process.env.RT0S) {
+  argv.rt0s = process.env.RT0S;
+}
+
 function sleep(time) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
@@ -100,6 +104,34 @@ var dump_devs = () => {
     return
   }
   duh = true;
+  // mq.req_ind('+', 'updates', (a, b) => {
+  //   // if (b.topic = 'adc_ind_ak')
+  //   //   return
+  //   // if (b.topic = 'state')
+  //   //   return
+  //   console.log(b.device, b.event, b.fn, b.payload);
+  // });
+  // mq.req_ind('+', 'adc_ind_ak', (a, b) => {
+  //   var now = stamp()
+  //   d = new Date(now).toISOString()
+  //   var metrics=[]
+  //   for (var k of Object.keys(b)) {
+  //     if (hit = k.match(/^._([A-Z]+$)/)) {
+  //       metrics.push(k)
+  //     }
+  //   }
+  //   var s = sprintf("%3d: ", b.id);
+
+  //   for (k of metrics) {
+  //     // if (k.substring(0,1)=='V')
+  //     //   s += sprintf("%s: %2.3fV ∂:%3umV ",k, b[k]/1000, b[`${k}_VAR`]);
+  //     if (k.substring(0,1)=='V')
+  //       s += sprintf("%s: %4d ∂:%3d ",k, b[k], b[`${k}_VAR`]);
+  //     else if (k.substring(0,1)=='T')
+  //       s += sprintf("%s: %2.1f°C ∂:%.1f°C ",k, b[k]/10000, b[`${k}_VAR`]/1000);
+  //   }
+  //   console.log(s);
+  // })
   mq.req_ind('+', 'log_write', (a, b) => {
     var now = stamp()
     d = new Date(now).toISOString()

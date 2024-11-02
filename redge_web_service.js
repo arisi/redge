@@ -329,15 +329,15 @@ var start_services = () => {
   }
   var changed = (event, path) => {
     for (var o of watchers) {
-      log("changed ", event, path, o.path, path.substr(0, o.path.length))
+      //log("changed ", event, path, o.path, path.substr(0, o.path.length))
       if (o.path == path.substr(0, o.path.length)) {
-        log("changed HIT", event, path,o.path)
+        //log("changed HIT", event, path,o.path)
         o.cb(event,path)
       }
-      else if (o.path == path.substr(0, o.path.length)) {
-        log("changed HIT", event, path,o.path)
-        o.cb(event,path)
-      }
+      // else if (o.path == path.substr(0, o.path.length)) {
+      //   log("changed HIT", event, path,o.path)
+      //   o.cb(event,path)
+      // }
     }
   }
   chokidar.watch(p, {
@@ -393,16 +393,16 @@ var start_services = () => {
               })
               var p = path.join(conf.web_home, u.static, "dynamic")
               register_watch(p, (event, path) => {
-                log("WATCHER:", event, path);
                 var fn = path.substr(p.length + 1)
                 var payload = ""
                 if (event != 'deleted')
                   payload = fs.readFileSync(path).toString()
-                  web_mq.publish({
-                  topic: `/ind/site_${u.name}/updates`,
-                  payload: JSON.stringify({event, fn, payload}),
-                  retain: false,
-                })
+                log("WATCHER:", event, path, "pub", `/ind/site_${u.name}/updates`);
+                web_mq.publish(
+                  `/ind/site_${u.name}/updates`,
+                  {event, fn, payload},
+                  {}
+                )
               })
             });
           })

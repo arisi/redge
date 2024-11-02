@@ -390,7 +390,7 @@ main = async (pfn) => {
                 console.log("no schema2 :(",sfn);
               }
             }
-            // temp mq.publish(`/ind/${argv.id}/${msg.topic}`, msg)
+            mq.publish(`/ind/${argv.id}/${msg.topic}`, msg)
           }
           console.log("");
         }

@@ -87,17 +87,22 @@ var build_index = (site) => {
     tag("link", link)
   for (var css of csss)
     tag("link", { rel: 'stylesheet', href: css, crossorigin: "anonymous" })
+
   tag("link", { rel: 'preload', href: 'conf.json', as: 'fetch', type: "application/json", crossorigin: "anonymous" })
   var p = path.join(conf.web_home, "web/lib")
   var lpreloads = fs.readdirSync(p)
   for (var preload of lpreloads) {
     tag("link", { rel: 'preload', href: preload, as: 'fetch', type: "text/html", crossorigin: "anonymous" })
   }
+
   var p = path.join(conf.web_home, site.static, "dynamic")
   var preloads = fs.readdirSync(p)
+  var ii = preloads.indexOf("redge-front.js");
+  console.log("zap this",preloads, ii);
   for (var preload of preloads) {
     tag("link", { rel: 'preload', href: preload, as: 'fetch', type: "text/html", crossorigin: "anonymous" })
   }
+  preloads.unshift("redge-front.js")
   tag("script", {}, `\nwindow.preloads=${JSON.stringify(preloads.concat(lpreloads), null, 2)};\n`)
   ctag()
   tag("body")

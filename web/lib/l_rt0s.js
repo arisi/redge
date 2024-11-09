@@ -4,7 +4,7 @@ window.Rt0s = class Rt0s {
     this.sublist = {};
     this.apis = {};
     this.reqs = {};
-    this.req_inds = [];
+    this.req_inds = {};
     this.sreqs = {}
     this.req_seq = 0
     this.connected = false;
@@ -258,31 +258,30 @@ window.Rt0s = class Rt0s {
     }
   };
 
-  req_ind(src, topic, cb) {
+  req_ind(src, topic, name, cb) {
     var key = src + "_" + topic
     var path = "/ind/" + src + "/" + topic
-    if (!(this.req_inds[key])) {
-      this.req_inds[key] = []
-    }
-    var len = this.req_inds[key].push({
+    // if (!(this.req_inds[name])) {
+    //   this.req_inds[name] = []
+    // }
+    var len = this.req_inds[name] = {
       'src': src,
       'topic': topic,
       'key': key,
       path,
       'cb': cb,
-    })
-    if (len == 1) // first of the kind => need to subs
-      this.client.subscribe(path)
-    return len - 1; // return position
+    }
+    //if (len == 1) // first of the kind => need to subs
+    this.client.subscribe(path)
+    //return len - 1; // return position
   }
 
-  unreq_ind(src, topic, i) {
+  unreq_ind(src, topic, name) {
     var key = src + "_" + topic
-    if (!(this.req_inds[key]))
+    console.log("unreq_ind",src,topic,key,name,this.req_inds);
+    if (!(this.req_inds[name]))
       return // no ind => nothing to do
-    if (!(this.req_inds[key][i]))
-      return // no ind => nothing to do
-    delete (this.req_inds[key][i])
+    delete (this.req_inds[name])
   }
 
   publish(path, obj, options = {}) {
@@ -430,11 +429,10 @@ window.Rt0s = class Rt0s {
     this.client.on(
       'message',
       function(topic, msg) {
-        for (var key in this.req_inds) {
+        for (var key of Object.keys(this.req_inds)) {
           var req_ind = this.req_inds[key]
-          //console.log("chkxxx", key, req_ind);
-          for (var i in req_ind) {
-            var ind = req_ind[i]
+          //console.log("chkxxx", key, req_ind,Object.keys(this.req_inds));
+            var ind = req_ind
             if (Rt0s.match(ind['path'], topic)) {
               var obj = JSON.parse(msg.toString());
               var p = topic.split("/");
@@ -443,7 +441,7 @@ window.Rt0s = class Rt0s {
               obj.received = Rt0s.stamp();
               ind['cb'](ind, obj);
             }
-          }
+
         }
         Object.keys(this.sublist).forEach(sub => {
           if (Rt0s.match(sub, topic)) {

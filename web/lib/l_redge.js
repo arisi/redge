@@ -6,6 +6,7 @@ $_ = {
   preserved_state: {},
   idc: 1,
 }
+var cache = {};
 
 var requireSync = async (fn) => {
   var i = preloads.findIndex((a) => a == fn);
@@ -122,6 +123,17 @@ $(document).ready(async () => {
       }
     }
   }
+  window.$$$ = (name) => {
+    if (!name) {
+      console.error("Objects available", $_.objects.map((a) => {return a.name}))
+      throw ("No name given")
+    }
+    var o = $_.objects.find(o => o && o.name == name);
+    if (!o)
+      return false
+
+    return o;
+  }
 
   window.update_element = async (el, js_reload) => {
     var cl = $(el).children()
@@ -162,7 +174,9 @@ $(document).ready(async () => {
                 $_.objects[id].destructor()
             }
             delete $_.objects[id]
+            console.log("new");
             $_.objects[id] = new window[`js_${req.js}`](mq, conf, id, $(el).attr('name'), oldf, ddd)
+            console.log("new done");
             await $_.objects[id].sync(req)
             emit_button_event('RENDER', { id, name: $(el).attr('name') }, '');
           } else {
@@ -214,11 +228,20 @@ $(document).ready(async () => {
       }))
       $(el).attr('id', id)
       $(el).attr('data-id', id)
-      $_.objects[id].populate("") // populate the contents
+      if ($_.objects[id].name) {
+        console.log("pop", id, $_.objects[id]);
+        $_.objects[id].populate("") // populate the contents
+      }
     }
   }
 
   var do_loader = async (event, preload, s, initial) => {
+    if ((preload in cache) && (s == cache[preload])) {
+      log_green("CACHE hit '%s'", preload);
+      return;
+    }
+    cache[preload] = s;
+
     var hit = preload.match(/(.+)\.(.+)$/);
     if (hit) {
       if ((event == 'created') && (preloads.includes(preload))) {
@@ -382,7 +405,7 @@ $(document).ready(async () => {
       $("body").attr('data-js', `p_${page}`)
       $("body").attr('data-src', `hbs_p_${page}`)
 
-      mq.req_ind(`site_${conf.site}`, "updates", (a, status) => {
+      mq.req_ind(`site_${conf.site}`, "updates", "toppi", (a, status) => {
         log_darkcyan("CHANGED SOURCE '%s'", status.fn)
         do_loader(status.event, status.fn, status.payload)
       })

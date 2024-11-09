@@ -66,7 +66,7 @@ class RedgeIndex extends RedgeFront {
       return
     }
 
-    mq.req_ind("broker", 'state', async (a, b) => {
+    mq.req_ind("broker", 'state', "ztate", async (a, b) => {
       for (var con of Object.keys(b.cons)) {
         if (!$_.devices[con]) {
           try {

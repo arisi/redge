@@ -1,20 +1,35 @@
-<h1>
-  TADAA OK!!!x!
-</h1>
-<div
-  name="login"
-  class="ui fluid card"
-  data-src="hbs_p_lomake"
-  data-js="p_lomake"
-  data-form="login"
-  data-data='{"u":"moi"}'
-  data-title="POKS NAKS!!"
-></div>
-<div
-  name="login2"
-  class="ui fluid card"
-  data-src="hbs_p_test"
-  data-js="p_test"
-  data-form="login"
-  data-data="{}"
-></div>
+<div class="ui container">
+  <div class="ui celled grid">
+    <div class="row">
+      <div
+        class="six wide column"
+        name="touch"
+        data-src="hbs_p_lomake"
+        data-js="p_lomake"
+        data-form="touch"
+        data-data='{"u":"moi"}'
+      ></div>
+      <div class="ten wide column">
+        <canvas
+          style="border:1px solid olive;"
+          name="paint"
+          width="800"
+          height="400"
+          data-src="hbs_p_touch"
+          data-js="p_touch"
+        ></canvas>
+        <canvas
+        style="border:1px solid red;"
+        name="touch2"
+        width="800"
+        height="480"
+        data-src="hbs_p_touch"
+        data-js="p_canvas"
+      ></canvas>
+      </div>
+    </div>
+    <div class="row">
+
+    </div>
+  </div>
+</div>

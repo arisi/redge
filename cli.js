@@ -111,7 +111,7 @@ var dump_devs = () => {
   //   //   return
   //   console.log(b.device, b.event, b.fn, b.payload);
   // });
-  mq.req_ind('+', 'adc_ind_ak', (a, b) => {
+  mq.req_ind('+', 'adc_ind_akx', (a, b) => {
     var now = stamp()
     d = new Date(now).toISOString()
     var metrics=[]
@@ -128,9 +128,28 @@ var dump_devs = () => {
       if (k.substring(0,1)=='V')
         s += sprintf("%s: %4d ∂:%3d ",k, b[k], b[`${k}_VAR`]);
       else if (k.substring(0,1)=='T')
-        s += sprintf("%s: %2.1f°C ∂:%.1f°C ",k, b[k]/10000, b[`${k}_VAR`]/1000);
+        s += sprintf("%s: %.3fmV ∂:%.3fmV",k, b[k]/1000,b[`${k}_VAR`]/1000);
+        //s += sprintf("%s: %2.1f°C ∂:%.1f°C ",k, b[k]/10000, b[`${k}_VAR`]/1000);
     }
     console.log(s);
+  })
+  mq.req_ind('+', 'adc_ind_ak', (a, b) => {
+    var now = stamp()
+    d = new Date(b.sent).toISOString()
+    //console.log(d);
+    
+    var s = sprintf("%s;%d;%4d;", d,b.sent, b.id);
+
+    // s += sprintf("%.3fmV ∂:%.3fmV => %.3fmA ∂:%.3fmA => %.3fmW ∂:%.3fmW ", 
+    //   b["T_DIE"]/1000,b["T_DIE_VAR"]/1000, 
+    //   0.01*b["T_DIE"]/1000,0.01*b["T_DIE_VAR"]/1000,
+    //   1.7*0.01*b["T_DIE"]/1000,1.7*0.01*b["T_DIE_VAR"]/1000,
+    // );
+    s += sprintf("%d;%.3f;%.3f", b["V_DDA"],
+      1.7*0.01*b["T_DIE"]/1000,1.7*0.01*b["T_DIE_VAR"]/1000,
+    ).replace(/\./g,",");
+    process.stdout.write(s+"\n");
+    
   })
   mq.req_ind('+', 'log_write', (a, b) => {
     var now = stamp()
@@ -141,11 +160,25 @@ var dump_devs = () => {
         serno = $_.devices[b.device].serno
       var s = ""
       if (b.bdata) {
-        s="["
-        for (byte of b.bdata) {
-          s+=sprintf("%02X ", byte.charCodeAt(0))
+        switch (b.stream) {
+          case 10:
+            s="["
+            for (var p=0; p < b.bdata.length;p+=2) {
+              //s+=sprintf("%5d ", (b.bdata.charCodeAt(p+1)<<8 )+ b.bdata.charCodeAt(p))
+              var v = (b.bdata.charCodeAt(p+1)<<8 )+ b.bdata.charCodeAt(p);
+              s+=sprintf("%6.3f ", 1000*(4.096*v/13096)/100)
+            }
+            s += "]"
+
+            break;
+          default:
+            s="["
+            for (byte of b.bdata) {
+              s+=sprintf("%02X ", byte.charCodeAt(0))
+            }
+            s += "]"
+            break;
         }
-        s += "]"
       }
       console.log(sprintf("%s %-12s #%d %s '%s'", d, serno, b.stream, s, b.data));
 

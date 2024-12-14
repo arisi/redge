@@ -339,7 +339,7 @@ main = async (pfn) => {
             var [id, s] = mqttsn.encode(pong)
             console.log("PUNG TO DUT", JSON.stringify(pong));
             //dump("ENCODED", 0, s);
-            var buf = HDLC.send(Buffer.from(s))
+            var buf = (Buffer.from(s))
             port.write(Buffer.from(buf))
           } else if (msg.topic == "pong") {
             console.log("from device PONG:", a2s(msg.data));

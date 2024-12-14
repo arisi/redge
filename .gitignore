@@ -15,3 +15,4 @@ py/.*
 py/__pycache__/**
 py/share/**
 **/artefact/**
+package-lock.json

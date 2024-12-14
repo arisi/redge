@@ -195,6 +195,16 @@
           size: 8,
           n: "data_len",
         },
+        {
+          name: "bdata_len",
+          size: 8,
+        },
+        {
+          name: "bdata",
+          type: "string",
+          size: 8,
+          n: "bdata_len",
+        },
       ],
     },
     generic_ack: {

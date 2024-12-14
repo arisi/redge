@@ -1,0 +1,15 @@
+[Unit]
+Description="X-arm Service"
+
+[Service]
+ExecStart=/home/ubuntu/dev/redge/index.js --conf x-arm_web.json5
+WorkingDirectory=/home/ubuntu/dev/redge/
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=X-arm
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target

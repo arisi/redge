@@ -8,6 +8,7 @@
     "open-arm.net",
     "mygeiger.com",
     "x-arm.com",
+    "ps.x-arm.com",
     "loractive.io"
   ],
   users: [
@@ -48,21 +49,6 @@
       port: 80,
       protocol: "http",
       sites: [
-        {
-          name: "redir",
-          redir: 'https://x-arm.com/',
-          urls: ["x-arm.com"],
-        },
-        {
-          name: "redir2",
-          redir: 'https://rt0s.com/',
-          urls: ["rt0s.com"],
-        },
-        {
-          name: "redir3",
-          redir: 'https://loractive.io/',
-          urls: ["loractive.io"],
-        },
       ],
     },
     {
@@ -74,6 +60,11 @@
           name: "x-arm",
           static: "x-arm",
           urls: ["x-arm.com"],
+        },
+        {
+          name: "powersniffer",
+          static: "powersniffer",
+          urls: ["ps.x-arm.com"],
         },
         {
           name: "rt0s.fi",

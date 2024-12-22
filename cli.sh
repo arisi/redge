@@ -1,1 +1,1 @@
-RT0S=ws://localhost:8092 node -r ./cli.js
+RT0S=wss://rt0s.com:8080 node -r ./cli.js

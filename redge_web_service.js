@@ -99,7 +99,7 @@ var build_index = (site) => {
   var p = path.join(conf.web_home, site.static, "dynamic")
   var preloads = fs.readdirSync(p)
   var ii = preloads.indexOf("redge-front.js");
-  console.log("zap this",preloads, ii);
+  //console.log("zap this", preloads, ii);
   for (var preload of preloads) {
     tag("link", { rel: 'preload', href: preload, as: 'fetch', type: "text/html", crossorigin: "anonymous" })
   }
@@ -140,8 +140,8 @@ const options = {
       cb(null)
       return;
     }
-    key_fn = `${conf.acme_home}/${servername}${conf.acme_postfix||''}/${servername}.key`.replace('~', home_dir)
-    cer_fn = `${conf.acme_home}/${servername}${conf.acme_postfix||''}/fullchain.cer`.replace('~', home_dir)
+    key_fn = `${conf.acme_home}/${servername}${conf.acme_postfix || ''}/${servername}.key`.replace('~', home_dir)
+    cer_fn = `${conf.acme_home}/${servername}${conf.acme_postfix || ''}/fullchain.cer`.replace('~', home_dir)
     if (!fs.existsSync(key_fn)) {
       console.error(`*** no tls file for ${servername} ${key_fn} at ${__dirname}`)
     }
@@ -173,12 +173,12 @@ const options = {
 var web_respond = (s, req, res, next) => {
   var hit
   if (hit = req.path.match(/\/\.well-known\/(.+)$/)) {
-    console.log("hit acme renew",hit[1]);
+    console.log("hit acme renew", hit[1]);
     try {
       res.send(fs.readFileSync(path.join(pwd, 'acme_temp/.well-known', hit[1])))
-      return; 
+      return;
     } catch (error) {
-      ;      
+      ;
     }
   }
   if (!("hostname" in req)) {
@@ -204,7 +204,7 @@ var web_respond = (s, req, res, next) => {
   }
   var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
   try {
-    dns.reverse(ip, function(err, result) {
+    dns.reverse(ip, function (err, result) {
       logger(`rd;;${s.protocol};${req.hostname};${req.path};${ip};0;${result || ''}`)
     })
   } catch (error) {
@@ -265,7 +265,7 @@ var web_respond = (s, req, res, next) => {
       return;
     } else if (fs.existsSync(full_fn)) {
       var size = fs.statSync(full_fn).size
-      dns.reverse(ip, function(err, result) {
+      dns.reverse(ip, function (err, result) {
         logger(
           `ok;${req.sessionID};${hit.name};${s.protocol};${req.hostname};${req.path};${ip};${size};${result ||
           ''}`
@@ -276,15 +276,12 @@ var web_respond = (s, req, res, next) => {
       var pext = p.split(".").pop();
       var pbase = p.substr(0, p.length - pext.length - 1);
 
-      // check libs
-      //if ((pext == 'js') && (path.basename(p).substring(0,2) == 'l_')) {
-        var lib_fn = path.join(conf.web_home, "lib", p)
-        if (fs.existsSync(lib_fn)) {
-          console.log("lib hit", lib_fn);
-          res.sendFile(lib_fn)
-          return
-        }
-      //}
+      var lib_fn = path.join(conf.web_home, "lib", p)
+      if (fs.existsSync(lib_fn)) {
+        //console.log("lib hit", lib_fn);
+        res.sendFile(lib_fn)
+        return
+      }
 
       var html_fn = path.join(conf.web_home, hit.static, "dynamic", p)
       if (fs.existsSync(html_fn)) {
@@ -303,12 +300,12 @@ var web_respond = (s, req, res, next) => {
       if (req.method.toString() == 'POST') {
         req.pipe(req.busboy);
         console.log("Uploading...");
-        req.busboy.on('file', function(fieldname, file, filename) {
+        req.busboy.on('file', function (fieldname, file, filename) {
           console.log("Uploading: " + filename);
 
           fstream = fs.createWriteStream('/tmp/img/' + filename);
           file.pipe(fstream);
-          fstream.on('close', function() {
+          fstream.on('close', function () {
             console.log("Upload Finished of " + filename);
             res.redirect('back');
           });
@@ -316,12 +313,21 @@ var web_respond = (s, req, res, next) => {
         return;
       }
       res.sendStatus(404)
-      dns.reverse(ip, function(err, result) {
+      dns.reverse(ip, function (err, result) {
         logger(
           `nf;${req.sessionID};;${hit.name};${s.protocol};${req.hostname};${req.path};${ip};0;${result || ''};${req.method}`
         )
       })
     }
+  } else {
+    if (s.protocol == 'http') {
+      var red = `https://${req.hostname}${req.path}`
+      res.redirect(red);
+      console.log("redir http to https", red);
+      return;
+    }
+    console.log("no hit on domain", req.hostname);
+    res.sendStatus(404)
   }
 }
 
@@ -329,7 +335,7 @@ var my_session = session({
   secret: 'keyboard cat',
   resave: false,
   saveUninitialized: true,
-  genid: function(req) {
+  genid: function (req) {
     var id = uuidv4()
     return id
   },
@@ -337,18 +343,18 @@ var my_session = session({
 });
 
 var start_services = () => {
-  var p = path.join(conf.web_home, "web")
+  var p = path.join(conf.web_home)
   var watchers = []
   var register_watch = (path, cb) => {
     log("reg watch", path)
-    watchers.push({path, cb});
+    watchers.push({ path, cb });
   }
   var changed = (event, path) => {
     for (var o of watchers) {
       //log("changed ", event, path, o.path, path.substr(0, o.path.length))
       if (o.path == path.substr(0, o.path.length)) {
         //log("changed HIT", event, path,o.path)
-        o.cb(event,path)
+        o.cb(event, path)
       }
       // else if (o.path == path.substr(0, o.path.length)) {
       //   log("changed HIT", event, path,o.path)
@@ -384,7 +390,7 @@ var start_services = () => {
           app.use(cors());
           app.use(compression())
           if (s.protocol == 'https') {
-            app.use(function(req, res, next) {
+            app.use(function (req, res, next) {
               res.header("Access-Control-Allow-Origin", "*");
               res.header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
               res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -417,7 +423,7 @@ var start_services = () => {
                 log("WATCHER:", event, path, "pub", `/ind/site_${u.name}/updates`);
                 web_mq.publish(
                   `/ind/site_${u.name}/updates`,
-                  {event, fn, payload},
+                  { event, fn, payload },
                   {}
                 )
               })
@@ -455,7 +461,7 @@ var start_services = () => {
             cb(true)
           }
           ws.createServer({ server: httpServer, verifyClient: verifyWsClient }, aedes.handle)
-          httpServer.listen(s.port, function() {
+          httpServer.listen(s.port, function () {
             console.log(`.. listening ${s.protocol}://${s.url}:${s.port}`)
           })
         }
@@ -475,7 +481,7 @@ var start_services = () => {
           }
           const httpServers = https.createServer(options)
           const ws_server = ws.createServer({ server: httpServers, verifyClient: verifyWsClient }, aedes.handle)
-          httpServers.listen(s.port, function() {
+          httpServers.listen(s.port, function () {
             console.log(`.. listening ${s.protocol}://${s.url}:${s.port}`)
           })
         }
@@ -508,6 +514,9 @@ var start_services = () => {
       default:
         break
     }
+  })
+  register_watch(conf.web_home, (event, path) => {
+    log("site change", event, path);
   })
 }
 

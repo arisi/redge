@@ -142,16 +142,18 @@ const options = {
     var ok = hostcheck(servername)
     if (!ok) {
       console.log("bad url at tls", servername)
-      cb(null)
+      //cb(null)
       return;
     }
     key_fn = `${conf.acme_home}/${servername}${conf.acme_postfix || ''}/${servername}.key`.replace('~', home_dir)
     cer_fn = `${conf.acme_home}/${servername}${conf.acme_postfix || ''}/fullchain.cer`.replace('~', home_dir)
     if (!fs.existsSync(key_fn)) {
       console.error(`*** no tls file for ${servername} ${key_fn} at ${__dirname}`)
+      return;
     }
     if (!fs.existsSync(cer_fn)) {
       console.error(`*** no tls files for ${servername} ${cer_fn} at ${__dirname}`)
+      return;
     }
     if (!(servername in certs)) {
       try {
@@ -178,7 +180,7 @@ const options = {
 var web_respond = (s, req, res, next) => {
   var hit
   if (hit = req.path.match(/\/\.well-known\/(.+)$/)) {
-    console.log("hit acme renew", hit[1]);
+    console.log("hit acme renew", hit[1], req.hostname);
     try {
       res.send(fs.readFileSync(path.join(pwd, 'acme_temp/.well-known', hit[1])))
       return;
@@ -241,10 +243,10 @@ var web_respond = (s, req, res, next) => {
       res.redirect(hit.redir);
       return;
     }
-    // if (s.protocol == 'https') {
-    //   console.log("check ssl", req.hostname, s);
+    if (s.protocol == 'https') {
+      console.log("check ssl", req.hostname, s);
 
-    // }
+    }
     var p = req.path == '/' ? '/index.html' : req.path
     var fn = `${hit.static}/${p}`
     var full_fn = path.join(conf.web_home, fn)

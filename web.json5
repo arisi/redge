@@ -1,0 +1,133 @@
+{
+  jwt_secret: "demo123",
+  acme_home: "~/.acme.sh/",
+  "acme_postfix": "_ecc",
+  urls: [
+    "localhost",
+    "rt0s.com",
+    "open-arm.net",
+    "mygeiger.com",
+    "x-arm.com",
+    "loractive.io"
+  ],
+  users: [
+    {
+      username: "anon",
+      password: "anon",
+      acl: "anon",
+      rate: 10,
+      max_sessions: 6,
+    },
+    {
+      username: "arisi",
+      password: "matti123",
+      acl: "default",
+      rate: 10,
+      max_sessions: 6,
+    },
+    {
+      username: "demo",
+      password: "demo",
+      acl: "default",
+      rate: 100,
+      max_sessions: 6,
+    },
+  ],
+  ports: [
+    {path: '/dev/tty.usbserial-FTD3SEN6', type: 'hdlc', baudrate: 38400}
+  ],
+  runners: {
+    // r_mongoDb: {bin: './runners/r_mongoDb.js', args: {}, run:true},
+    duh555: {bin: './runners/duh.js', args: {id:555}},
+    r_serial_hdlc: {bin: './runners/r_serial_hdlc.js', args: {schema: 'base_mqtt.json5'}},
+    // duh333: {bin: './runners/duh.js', args: {id:333}},
+  },
+  sockets: [
+    {
+      name: "http",
+      port: 80,
+      protocol: "http",
+      sites: [
+        {
+          name: "redir",
+          redir: 'https://x-arm.com/',
+          urls: ["x-arm.com"],
+        },
+        {
+          name: "redir2",
+          redir: 'https://rt0s.com/',
+          urls: ["rt0s.com"],
+        },
+        {
+          name: "redir3",
+          redir: 'https://loractive.io/',
+          urls: ["loractive.io"],
+        },
+      ],
+    },
+    {
+      name: "https",
+      port: 443,
+      protocol: "https",
+      sites: [
+        {
+          name: "x-arm",
+          static: "x-arm",
+          urls: ["x-arm.com"],
+        },
+        {
+          name: "rt0s.fi",
+          static: "open-arm",
+          urls: ["rt0s.com"],
+        },
+        {
+          name: "loractive.io",
+          static: "loractive",
+          urls: ["loractive.io", "open-arm.net", "mygeiger.com"],
+        },
+      ],
+    },
+    {
+      name: "mqtt",
+      port: 1000,
+      protocol: "mqtt",
+      max_connected: 200,
+      url: "localhost",
+      users: ["*"],
+    },
+    {
+      name: "mqtts",
+      port: 1001,
+      protocol: "mqtts",
+      max_connected: 200,
+      url: "rt0s.com",
+      users: ["*"],
+    },
+    {
+      name: "ws",
+      port: 1002,
+      protocol: "ws",
+      max_connected: 200,
+      url: "rt0s.com",
+      users: ["demo", "anon"],
+    },
+    {
+      name: "wss",
+      port: 8080,
+      protocol: "wss",
+      max_connected: 200,
+      url: "rt0s.com",
+      users: ["demo", "anon"],
+    },
+    {
+      name: "wss_hdlc",
+      port: 7878,
+      protocol: "wss_hdlc",
+      max_connected: 200,
+      url: "rt0s.com",
+      users: ["demo", "anon"],
+    },
+  ],
+  web_home: "/Users/arisi/sites",
+  //web_home: "/Users/arisi/dev23/legacy",
+}

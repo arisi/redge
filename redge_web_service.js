@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken')
 const ws = require('websocket-stream')
 const express = require('express')
 const session = require('express-session')
+var compression = require('compression')
 const cors = require('cors');
 const proxy = require('express-http-proxy');
 var busboy = require('connect-busboy');
@@ -89,7 +90,7 @@ var build_index = (site) => {
     tag("link", { rel: 'stylesheet', href: css, crossorigin: "anonymous" })
 
   tag("link", { rel: 'preload', href: 'conf.json', as: 'fetch', type: "application/json", crossorigin: "anonymous" })
-  var p = path.join(conf.web_home, "web/lib")
+  var p = path.join(conf.web_home, "lib")
   var lpreloads = fs.readdirSync(p)
   for (var preload of lpreloads) {
     tag("link", { rel: 'preload', href: preload, as: 'fetch', type: "text/html", crossorigin: "anonymous" })
@@ -170,6 +171,16 @@ const options = {
 }
 
 var web_respond = (s, req, res, next) => {
+  var hit
+  if (hit = req.path.match(/\/\.well-known\/(.+)$/)) {
+    console.log("hit acme renew",hit[1]);
+    try {
+      res.send(fs.readFileSync(path.join(pwd, 'acme_temp/.well-known', hit[1])))
+      return; 
+    } catch (error) {
+      ;      
+    }
+  }
   if (!("hostname" in req)) {
     res.end()
     return
@@ -267,7 +278,7 @@ var web_respond = (s, req, res, next) => {
 
       // check libs
       //if ((pext == 'js') && (path.basename(p).substring(0,2) == 'l_')) {
-        var lib_fn = path.join(conf.web_home, "web/lib", p)
+        var lib_fn = path.join(conf.web_home, "lib", p)
         if (fs.existsSync(lib_fn)) {
           console.log("lib hit", lib_fn);
           res.sendFile(lib_fn)
@@ -371,6 +382,7 @@ var start_services = () => {
           var app = express()
           app.set('trust proxy', 1) // trust first proxy
           app.use(cors());
+          app.use(compression())
           if (s.protocol == 'https') {
             app.use(function(req, res, next) {
               res.header("Access-Control-Allow-Origin", "*");

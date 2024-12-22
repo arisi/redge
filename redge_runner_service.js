@@ -6,7 +6,7 @@ const path = require('path')
 const chokidar = require('chokidar');
 const log = console.log.bind(console);
 var { AsciiTable3, AlignmentEnum } = require('ascii-table3');
-const { spawn, execSync } = require('child_process');
+const { spawn } = require('child_process');
 
 var conf;
 var web_conf

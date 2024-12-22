@@ -17,6 +17,7 @@ const path = require('path')
 const dns = require('dns')
 const Handlebars = require("handlebars");
 const chokidar = require('chokidar');
+const { spawnSync } = require('child_process');
 const log = console.log.bind(console);
 
 const certs = {}
@@ -26,6 +27,10 @@ var conf;
 var web_conf
 const home_dir = os.homedir();
 const pwd = process.cwd()
+
+function sleep(time) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
 
 uuidv4 = () => {
   var result, i, j
@@ -194,10 +199,10 @@ var web_respond = (s, req, res, next) => {
     res.end()
     return
   }
-  // if (req.hostname.match(/\d+\.\d+\.\d+\.\d+/) || req.hostname.match(/::ffff:\d+\.\d+\.\d+\.\d+/)) {
-  //   res.end()
-  //   return
-  // }
+  if (req.hostname.match(/\d+\.\d+\.\d+\.\d+/) || req.hostname.match(/::ffff:\d+\.\d+\.\d+\.\d+/)) {
+    res.end()
+    return
+  }
   if (req.path.match(/\.php$/) || req.path.match(/\.aspx$/)) {
     res.end()
     return
@@ -220,22 +225,26 @@ var web_respond = (s, req, res, next) => {
       }
     }
   }
-  if (!hit) {
-    for (i = 0; i < s.sites.length && !hit; i++) {
-      site = s.sites[i]
-      for (j = 0; j < site.urls.length && !hit; j++) {
-        if (req.hostname.match(site.urls[j])) {
-          hit = site
-        }
-      }
-    }
-  }
+  // if (!hit) {
+  //   for (i = 0; i < s.sites.length && !hit; i++) {
+  //     site = s.sites[i]
+  //     for (j = 0; j < site.urls.length && !hit; j++) {
+  //       if (req.hostname.match(site.urls[j])) {
+  //         hit = site
+  //       }
+  //     }
+  //   }
+  // }
   if (hit) {
     if (hit.redir) {
       log("redir", hit.redir)
       res.redirect(hit.redir);
       return;
     }
+    // if (s.protocol == 'https') {
+    //   console.log("check ssl", req.hostname, s);
+
+    // }
     var p = req.path == '/' ? '/index.html' : req.path
     var fn = `${hit.static}/${p}`
     var full_fn = path.join(conf.web_home, fn)
@@ -326,7 +335,14 @@ var web_respond = (s, req, res, next) => {
       console.log("redir http to https", red);
       return;
     }
-    console.log("no hit on domain", req.hostname);
+    var hit
+    if (hit = req.hostname.match(/^www\.(.+)$/)) {
+      var d= `${s.protocol}:\/\/${hit[1]}`;
+      console.log("redir www to base url", req.hostname, hit, d);
+      res.redirect(d);
+      return;
+    }
+    console.log("no hit on domain!", req.hostname);
     res.sendStatus(404)
   }
 }
@@ -342,6 +358,24 @@ var my_session = session({
   cookie: { secure: true, maxAge: 600000 }
 });
 
+var renew_domain = async (site) => {
+  var cmd = `--issue -d ${site} --server letsencrypt --webroot acme_temp`;
+  var ret = spawnSync(`/Users/arisi/.acme.sh/acme.sh`, cmd.split(' '), { timeout: 30000 });
+  switch (ret.status) {
+    case 2:
+      log(`renew_domain ${site} OK`);
+      break;
+    case 1:
+      log(`renew_domain ${site} FAILED: Too Many Fails, try later..`);
+      break;
+    default:
+      log("********* renew_domain done", site, ret.status, ret.stdout.toString(), ret.stderr.toString());
+      await sleep(100);
+      break;
+  }
+}
+
+
 var start_services = () => {
   var p = path.join(conf.web_home)
   var watchers = []
@@ -350,6 +384,12 @@ var start_services = () => {
     watchers.push({ path, cb });
   }
   var changed = (event, path) => {
+    var hit
+    if (hit = path.match(`${conf.web_home}\/([a-z0-9_A-Z]+)\/`)) {
+      //log("********* site changed?", event, hit[1], conf.urls)
+      //site_check(hit[1]);
+    } else
+      log("********* site changed DUH?", event, path)
     for (var o of watchers) {
       //log("changed ", event, path, o.path, path.substr(0, o.path.length))
       if (o.path == path.substr(0, o.path.length)) {
@@ -365,7 +405,8 @@ var start_services = () => {
   chokidar.watch(p, {
     ignored: /(^|[\/\\])\../, // ignore dotfiles
     persistent: true,
-    ignoreInitial: true
+    ignoreInitial: true,
+    // usePolling: true,
   })
     .on('error', (error) => log(`Watcher error: ${error}`))
     .on('ready', () => log(`.. watching ${p}`))
@@ -476,7 +517,6 @@ var start_services = () => {
               servername: info.req.client.servername,
               protocol: 'wss'
             }
-            // console.log(info.req.ari);
             cb(true)
           }
           const httpServers = https.createServer(options)
@@ -515,9 +555,20 @@ var start_services = () => {
         break
     }
   })
-  register_watch(conf.web_home, (event, path) => {
-    log("site change", event, path);
-  })
+  console.log("Checking Domain SSLs");
+  conf.urls = [];
+  for (var s of conf.sockets) {
+    if (s.protocol == 'https') {
+      for (var domains of s.sites) {
+        for (var domain of domains.urls) {
+          renew_domain(domain);
+          conf.urls.push(domain);
+        }
+      }
+    }
+  }
+  console.log("Domains:", conf.urls);
+
 }
 
 config = (_argv, _conf, _web_conf, _aedes) => {

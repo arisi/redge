@@ -17,3 +17,4 @@ py/share/**
 **/artefact/**
 package-lock.json
 web.old/**
+acme_temp/.well-known/acme-challenge/**

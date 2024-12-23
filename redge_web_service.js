@@ -244,7 +244,7 @@ var web_respond = (s, req, res, next) => {
       return;
     }
     if (s.protocol == 'https') {
-      console.log("check ssl", req.hostname, s);
+      //console.log("check ssl", req.hostname, s);
 
     }
     var p = req.path == '/' ? '/index.html' : req.path
@@ -339,7 +339,7 @@ var web_respond = (s, req, res, next) => {
     }
     var hit
     if (hit = req.hostname.match(/^www\.(.+)$/)) {
-      var d= `${s.protocol}:\/\/${hit[1]}`;
+      var d = `${s.protocol}:\/\/${hit[1]}`;
       console.log("redir www to base url", req.hostname, hit, d);
       res.redirect(d);
       return;
@@ -379,6 +379,35 @@ var renew_domain = async (site) => {
 
 
 var start_services = () => {
+
+
+  console.log("Checking Sites:", conf.web_home);
+  var sites=[]
+  for (var dir of fs.readdirSync(conf.web_home)) {
+    switch (dir) {
+      case 'lib':
+      case 'style':
+      case 'template':
+        break;
+      default:
+        var c = JSON.parse(fs.readFileSync(path.join(conf.web_home, dir, 'config.json')).toString())
+        console.log("dir", dir, c.domains);
+        sites.push({
+          name: dir,
+          static: dir,
+          urls: c.domains
+        })
+        break;
+    }
+  }
+  console.log("sites", sites);
+  for (var s of conf.sockets) {
+    if (s.protocol=='https') {
+      log("JEZ",s)
+      s.sites= sites;
+    }
+  }
+
   var p = path.join(conf.web_home)
   var watchers = []
   var register_watch = (path, cb) => {
@@ -570,6 +599,8 @@ var start_services = () => {
     }
   }
   console.log("Domains:", conf.urls);
+
+
 
 }
 

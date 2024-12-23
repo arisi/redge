@@ -47,34 +47,14 @@
       port: 443,
       protocol: "https",
       sites: [
-        {
-          name: "x-arm",
-          static: "x-arm",
-          urls: ["x-arm.com"],
-        },
-        {
-          name: "powersniffer",
-          static: "powersniffer",
-          urls: ["ps.x-arm.com"],
-        },
-        {
-          name: "rt0s.fi",
-          static: "open-arm",
-          urls: ["rt0s.com"],
-        },
-        {
-          name: "loractive.io",
-          static: "loractive",
-          urls: ["loractive.io", "open-arm.net"],
-        },
-      ],
+      ]
     },
     {
       name: "mqtt",
       port: 1000,
       protocol: "mqtt",
       max_connected: 200,
-      url: "localhost",
+      url: "rt0s.com",
       users: ["*"],
     },
     {

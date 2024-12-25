@@ -25,6 +25,8 @@ var aedes;
 var web_mq;
 var conf;
 var web_conf
+var web_id;
+
 const home_dir = os.homedir();
 const pwd = process.cwd()
 
@@ -262,6 +264,7 @@ var web_respond = (s, req, res, next) => {
         site: hit.name,
         sid: req.sessionID,
         ip: req.ip,
+        broker_id: web_id,
         ...web_conf,
       }
       if ('conf' in hit) {
@@ -388,15 +391,20 @@ var start_services = () => {
       case 'lib':
       case 'style':
       case 'template':
+      case '.git':
         break;
       default:
-        var c = JSON.parse(fs.readFileSync(path.join(conf.web_home, dir, 'config.json')).toString())
-        console.log("dir", dir, c.domains);
-        sites.push({
-          name: dir,
-          static: dir,
-          urls: c.domains
-        })
+        try {
+          var c = JSON.parse(fs.readFileSync(path.join(conf.web_home, dir, 'config.json')).toString())
+          console.log("dir", dir, c.domains);
+          sites.push({
+            name: dir,
+            static: dir,
+            urls: c.domains
+          })
+        } catch (error) {
+          //          
+        }
         break;
     }
   }
@@ -610,10 +618,14 @@ config = (_argv, _conf, _web_conf, _aedes) => {
   aedes = _aedes;
   web_conf = _web_conf;
   rt0s = require('rt0s_js');
-  web_mq = new rt0s(argv.rt0s, argv.id + ":web:daemon", "demo", "demo");
-  console.log('Connected to Broker at', argv.rt0s);
-  web_mq.registerSyncAPI("poks", "Count Records", [], async (msg) => {
-    return "jesp!"
+  web_id = argv.id + ":web:daemon"
+  web_mq = new rt0s(argv.rt0s, web_id, "demo", "demo");
+  console.log('Connected to Broker at', argv.rt0s, 'as', web_id);
+  web_mq.registerSyncAPI("inforeq", "Register Info Request", [
+    { name: 'obj', type: 'json' },
+  ], async (msg) => {
+    log("inforeq",msg.req.args[1].obj);
+    return "Info Request Saved"
   });
   start_services()
 }

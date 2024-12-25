@@ -624,7 +624,10 @@ config = (_argv, _conf, _web_conf, _aedes) => {
   web_mq.registerSyncAPI("inforeq", "Register Info Request", [
     { name: 'obj', type: 'json' },
   ], async (msg) => {
-    log("inforeq",msg.req.args[1].obj);
+    var data = msg.req.args[1].obj
+    data.our_stamp = stamp();
+    log("inforeq",data);
+    fs.appendFileSync("inforeq.txt",JSON.stringify(data)+"\n")
     return "Info Request Saved"
   });
   start_services()

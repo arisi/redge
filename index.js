@@ -45,7 +45,7 @@ const argv = yargs
   .option('log_dir', {
     description: 'Logging directory, ""=> no logging',
     type: 'string',
-    default: ""
+    default: "log"
   })
   .option('scan', {
     description: 'Scan Serial ports',

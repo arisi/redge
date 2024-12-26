@@ -18,6 +18,9 @@ const dns = require('dns')
 const Handlebars = require("handlebars");
 const chokidar = require('chokidar');
 const { spawnSync } = require('child_process');
+//const spdy = require('spdy');
+var UglifyJS = require("uglify-js");
+
 const log = console.log.bind(console);
 
 const certs = {}
@@ -69,6 +72,7 @@ var build_index = (site) => {
   var ctag = () => {
     s += `</${tags.pop()}>\n`
   }
+  tag("!DOCTYPE html")
   tag("html")
   tag("head")
   var scripts = []
@@ -212,13 +216,14 @@ var web_respond = (s, req, res, next) => {
     return
   }
   var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
-  try {
-    dns.reverse(ip, function (err, result) {
-      logger(`rd;;${s.protocol};${req.hostname};${req.path};${ip};0;${result || ''}`)
-    })
-  } catch (error) {
-    //
-  }
+  // try {
+  //   dns.reverse(ip, function (err, result) {
+  //     logger(`rd;;${s.protocol};${req.hostname};${req.path};${ip};0;${result || '?'}`)
+  //   })
+  // } catch (error) {
+  //   console.log("dns err",ip,error);
+    
+  // }
   if (ip.slice(0, 7) == '::ffff:') ip = ip.slice(7)
   hit = false
   for (i = 0; i < s.sites.length && !hit; i++) {
@@ -260,29 +265,39 @@ var web_respond = (s, req, res, next) => {
     var base = fn.substr(0, fn.length - ext.length - 1);
     res.header('sid', req.sessionID)
     if (p == '/conf.json') {
-      obj = {
-        site: hit.name,
-        sid: req.sessionID,
-        ip: req.ip,
-        broker_id: web_id,
-        ...web_conf,
-      }
-      if ('conf' in hit) {
+      dns.reverse(ip, function (err, result) {
         obj = {
-          ...hit.conf,
-          ...obj
+          site: hit.name,
+          sid: req.sessionID,
+          ip: req.ip,
+          dns: result || "?",
+          broker_id: web_id,
+          ...web_conf,
         }
-      }
-      res.send(JSON.stringify(obj, null, 2))
+        if ('conf' in hit) {
+          obj = {
+            ...hit.conf,
+            ...obj
+          }
+        }
+        res.send(JSON.stringify(obj, null, 2))
+      });
     } else if (p == '/index.html' && !fs.existsSync(full_fn)) {
-      res.send(build_index(hit))
+      var ss = build_index(hit)
+      dns.reverse(ip, function (err, result) {
+        logger(
+          `ok;${req.sessionID};${hit.name};${s.protocol};${req.hostname};${req.path};${ip};${ss.length};${result ||
+          '?'}`
+        )
+      })
+      res.send(ss)
       return;
     } else if (fs.existsSync(full_fn)) {
       var size = fs.statSync(full_fn).size
       dns.reverse(ip, function (err, result) {
         logger(
           `ok;${req.sessionID};${hit.name};${s.protocol};${req.hostname};${req.path};${ip};${size};${result ||
-          ''}`
+          '?'}`
         )
       })
       res.sendFile(fn, { root: conf.web_home })
@@ -292,14 +307,34 @@ var web_respond = (s, req, res, next) => {
 
       var lib_fn = path.join(conf.web_home, "lib", p)
       if (fs.existsSync(lib_fn)) {
-        //console.log("lib hit", lib_fn);
-        res.sendFile(lib_fn)
+        var size = fs.statSync(lib_fn).size
+        var ss = fs.readFileSync(lib_fn).toString();
+        
+        dns.reverse(ip, function (err, result) {
+          logger(
+            `ok;${ext};${req.sessionID};${hit.name};${s.protocol};${req.hostname};${req.path};${ip};${ss.length};${result ||
+            '?'}`
+          )
+        })
+        res.send(ss)
         return
       }
 
       var html_fn = path.join(conf.web_home, hit.static, "dynamic", p)
       if (fs.existsSync(html_fn)) {
-        res.sendFile(html_fn)
+        var size = fs.statSync(html_fn).size
+        var ss = fs.readFileSync(html_fn).toString();
+        if (ext=='js') {
+          ss= UglifyJS.minify(ss,{mangle:true,compress:{drop_console:false}}).code
+        }
+
+        dns.reverse(ip, function (err, result) {
+          logger(
+            `ok;${req.sessionID};${hit.name};${s.protocol};${req.hostname};${req.path};${ip};${ss.length};${result ||
+            '?'}`
+          )
+        })
+        res.send(ss)
         return
       }
       if (ext == 'html') {
@@ -307,7 +342,14 @@ var web_respond = (s, req, res, next) => {
         if (fs.existsSync(hb_fn)) {
           var ss = fs.readFileSync(hb_fn);
           const template = Handlebars.compile(ss.toString());
-          res.send(template({ name: "Nils" }));
+          var s = template({ })
+          dns.reverse(ip, function (err, result) {
+            logger(
+              `ok;${req.sessionID};${hit.name};${s.protocol};${req.hostname};${req.path};${ip};${s.length};${result ||
+              '?'}`
+            )
+          })
+          res.send(s);
           return;
         }
       }
@@ -471,6 +513,7 @@ var start_services = () => {
           app.use(compression())
           if (s.protocol == 'https') {
             app.use(function (req, res, next) {
+              res.header("Strict-Transport-Security", "max-age=1200");
               res.header("Access-Control-Allow-Origin", "*");
               res.header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
               res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -484,6 +527,7 @@ var start_services = () => {
           });
           var appp = app
           if (s.protocol == 'https') {
+            //appp = spdy.createServer(options, app)
             appp = https.createServer(options, app)
           }
           appp.listen(s.port, () => {

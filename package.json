@@ -39,7 +39,9 @@
     "object-observer": "^6.0.0",
     "rt0s_js": "^1.1.15",
     "serialport": "^12.0.0",
+    "spdy": "^4.0.2",
     "sprintf": "^0.1.5",
+    "uglify-js": "^3.19.3",
     "websocket-stream": "^5.5.2",
     "yargs": "^17.7.2"
   }

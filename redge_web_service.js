@@ -222,7 +222,7 @@ var web_respond = (s, req, res, next) => {
   //   })
   // } catch (error) {
   //   console.log("dns err",ip,error);
-    
+
   // }
   if (ip.slice(0, 7) == '::ffff:') ip = ip.slice(7)
   hit = false
@@ -309,7 +309,7 @@ var web_respond = (s, req, res, next) => {
       if (fs.existsSync(lib_fn)) {
         var size = fs.statSync(lib_fn).size
         var ss = fs.readFileSync(lib_fn).toString();
-        
+
         dns.reverse(ip, function (err, result) {
           logger(
             `ok;${ext};${req.sessionID};${hit.name};${s.protocol};${req.hostname};${req.path};${ip};${ss.length};${result ||
@@ -328,13 +328,13 @@ var web_respond = (s, req, res, next) => {
           ss= UglifyJS.minify(ss,{mangle:true,compress:{drop_console:false}}).code
         }
 
-        dns.reverse(ip, function (err, result) {
-          logger(
-            `ok;${req.sessionID};${hit.name};${s.protocol};${req.hostname};${req.path};${ip};${ss.length};${result ||
-            '?'}`
-          )
-        })
-        res.send(ss)
+              dns.reverse(ip, function (err, result) {
+                logger(
+                  `ok;${req.sessionID};${hit.name};${s.protocol};${req.hostname};${req.path};${ip};${ss.length};${result ||
+                  '?'}`
+                )
+              })
+              res.send(ss)
         return
       }
       if (ext == 'html') {
@@ -342,7 +342,7 @@ var web_respond = (s, req, res, next) => {
         if (fs.existsSync(hb_fn)) {
           var ss = fs.readFileSync(hb_fn);
           const template = Handlebars.compile(ss.toString());
-          var s = template({ })
+          var s = template({})
           dns.reverse(ip, function (err, result) {
             logger(
               `ok;${req.sessionID};${hit.name};${s.protocol};${req.hostname};${req.path};${ip};${s.length};${result ||
@@ -359,12 +359,12 @@ var web_respond = (s, req, res, next) => {
         req.busboy.on('file', function (fieldname, file, filename) {
           console.log("Uploading: " + filename);
 
-          fstream = fs.createWriteStream('/tmp/img/' + filename);
-          file.pipe(fstream);
-          fstream.on('close', function () {
-            console.log("Upload Finished of " + filename);
-            res.redirect('back');
-          });
+        //   fstream = fs.createWriteStream('/tmp/img/' + filename);
+        //   file.pipe(fstream);
+        //   fstream.on('close', function () {
+        //     console.log("Upload Finished of " + filename);
+        //     res.redirect('back');
+        //   });
         });
         return;
       }
@@ -427,7 +427,7 @@ var start_services = () => {
 
 
   console.log("Checking Sites:", conf.web_home);
-  var sites=[]
+  var sites = []
   for (var dir of fs.readdirSync(conf.web_home)) {
     switch (dir) {
       case 'lib':
@@ -452,9 +452,9 @@ var start_services = () => {
   }
   console.log("sites", sites);
   for (var s of conf.sockets) {
-    if (s.protocol=='https') {
-      log("JEZ",s)
-      s.sites= sites;
+    if (s.protocol == 'https') {
+      log("JEZ", s)
+      s.sites = sites;
     }
   }
 
@@ -670,8 +670,8 @@ config = (_argv, _conf, _web_conf, _aedes) => {
   ], async (msg) => {
     var data = msg.req.args[1].obj
     data.our_stamp = stamp();
-    log("inforeq",data);
-    fs.appendFileSync("inforeq.txt",JSON.stringify(data)+"\n")
+    log("inforeq", data);
+    fs.appendFileSync("inforeq.txt", JSON.stringify(data) + "\n")
     return "Info Request Saved"
   });
   start_services()

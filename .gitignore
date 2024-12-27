@@ -19,3 +19,4 @@ package-lock.json
 web.old/**
 acme_temp/.well-known/acme-challenge/**
 inforeq.txt
+nimi/**

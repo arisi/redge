@@ -223,16 +223,13 @@ class rt0s:
 
 
 if __name__ == "__main__":
-  mq = rt0s("ws://localhost:8092", username="demo", password="demo", client_id="pyx")
+  mq = rt0s("ws://mban-debug:2002", username="demo", password="demo", client_id="pyx")
   # ret = mq.call('dev:runner:daemon' ,["list_runners", { } ])
   # print(ret)
   # ret = mq.call('dev:runner:daemon' ,["api", { } ])
   # print(ret)
   def cb_indication(id, obj):
-    if id == "broker" and obj["topic"] == "state":
-      for key in obj['cons']:
-        print("ind:", id, key,obj['cons'][key]['indications'])
-    print("")
+    print(obj)
     return
-  mq.req_ind("broker", '+', cb_indication)
+  mq.req_ind("moreph", 'packet', cb_indication)
 

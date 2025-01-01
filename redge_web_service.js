@@ -59,7 +59,7 @@ var build_index = (site) => {
         o += ` ${k}="${obj[k]}"`;
       }
     if (['html', 'head', 'body'].indexOf(t) != -1) {
-      s += `<${t}>\n`
+      s += `<${t}${o}>\n`
       tags.push(t)
     } else if (['script', 'input'].indexOf(t) != -1) {
       s += `<${t}${o}>`
@@ -73,7 +73,7 @@ var build_index = (site) => {
     s += `</${tags.pop()}>\n`
   }
   tag("!DOCTYPE html")
-  tag("html")
+  tag("html", {lang: "en"})
   tag("head")
   var scripts = []
   var metas = []
@@ -116,8 +116,17 @@ var build_index = (site) => {
   }
   preloads.unshift("redge-front.js")
   tag("script", {}, `\nwindow.preloads=${JSON.stringify(preloads.concat(lpreloads), null, 2)};\n`)
+
+  if (oo.google_tag)
+    s += "<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KXMSFT92');</script>\n";
   ctag()
-  tag("body")
+  // for metro
+  //$("body").attr('class',"antialiased flex h-full text-base text-gray-700 [--tw-page-bg:#F6F6F9] [--tw-page-bg-dark:var(--tw-coal-200)] [--tw-content-bg:var(--tw-light)] [--tw-content-bg-dark:var(--tw-coal-500)] [--tw-content-scrollbar-color:#e8e8e8] [--tw-header-height:60px] [--tw-sidebar-width:90px] bg-[--tw-page-bg] dark:bg-[--tw-page-bg-dark]")
+
+
+  tag("body", {class: "antialiased flex h-full text-base text-gray-700 [--tw-page-bg:#F6F6F9] [--tw-page-bg-dark:var(--tw-coal-200)] [--tw-content-bg:var(--tw-light)] [--tw-content-bg-dark:var(--tw-coal-500)] [--tw-content-scrollbar-color:#e8e8e8] [--tw-header-height:60px] [--tw-sidebar-width:90px] bg-[--tw-page-bg] dark:bg-[--tw-page-bg-dark]"}) // site.
+  if (oo.google_tag)
+    s+= `<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=${oo.google_tag}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>\n`;
   var ss = ""
   var lfn = path.join(conf.web_home, site.static, "loading.html")
   if (fs.existsSync(lfn)) {

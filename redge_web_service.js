@@ -194,6 +194,8 @@ const options = {
 
 var web_respond = (s, req, res, next) => {
   var hit
+  console.log("req",req.hostname);
+  
   if (hit = req.path.match(/\/\.well-known\/(.+)$/)) {
     console.log("hit acme renew", hit[1], req.hostname);
     try {
@@ -462,7 +464,11 @@ var start_services = () => {
   console.log("sites", sites);
   for (var s of conf.sockets) {
     if (s.protocol == 'https') {
-      log("JEZ", s)
+      log("sites to https", s)
+      s.sites = sites;
+    }
+    if (s.protocol == 'http') {
+      log("sites to http", s)
       s.sites = sites;
     }
   }
@@ -650,11 +656,19 @@ var start_services = () => {
   console.log("Checking Domain SSLs");
   conf.urls = [];
   for (var s of conf.sockets) {
-    if (s.protocol == 'https') {
+    if (s.protocol == 'http') {
+      for (var domains of s.sites) {
+        for (var domain of domains.urls) {
+          if (!(domain in conf.urls))
+            conf.urls.push(domain);
+        }
+      }
+    } else if (s.protocol == 'https') {
       for (var domains of s.sites) {
         for (var domain of domains.urls) {
           renew_domain(domain);
-          conf.urls.push(domain);
+          if (!(domain in conf.urls))
+            conf.urls.push(domain);
         }
       }
     }
